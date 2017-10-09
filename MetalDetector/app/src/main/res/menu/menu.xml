@@ -4,8 +4,4 @@
             android:title="string/menu"
             android:orderInCategory="100"
             android:showAsAction="never" />
-        <item android:id="@+id/send"
-            android:title="string/send"
-            android:orderInCategory="100"
-            android:showAsAction="never" />
 </menu>
