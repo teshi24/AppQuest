@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Bundle;
@@ -89,7 +90,7 @@ public class MainActivity extends Activity {
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == REQUEST_TAKE_PHOTO) {
             if (resultCode == RESULT_OK) {
-                imageView.setImageBitmap(readImageFile(Uri.parse(mCurrentPhotoPath)));
+                imageView.setImageBitmap(applyFilter(readImageFile(Uri.parse(mCurrentPhotoPath))));
             }
         }
     }
@@ -135,25 +136,31 @@ public class MainActivity extends Activity {
     private Bitmap applyFilter(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
+  /*
         int[] data = new int[width * height];
 
         bitmap.getPixels(data, 0, width, 0, 0, width, height);
-
+        return Bitmap.createBitmap(data, width, height, Bitmap.Config.ARGB_8888);
+*/
         int redFilter = 0xFF0000;
 
         Canvas canvas = new Canvas();
-        for(int x = 0; x < bitmap.getWidth(); x++){
-            for(int y = 0; y < bitmap.getHeight(); y++){
-                int pixel = bitmap.getPixel(x,y);
+        for(int x = 0; x < width; x++){
+            for(int y = 0; y < height; y++){
+                int pixelColor = bitmap.getPixel(x,y);
+                int red = Color.red(pixelColor);
+                int blue = Color.blue(pixelColor);
+                int green = Color.green(pixelColor);
 
-                int newColor = pixel*redFilter;
+
+
+                int newColor = pixelColor*redFilter;
                 bitmap.setPixel(x,y,newColor);
             }
         }
         // Hier können die Pixel im data-array bearbeitet und
         // anschliessend damit ein neues Bitmap erstellt werden
-
-        return Bitmap.createBitmap(data, width, height, Bitmap.Config.ARGB_8888);
+        return bitmap;
     }
 
     // Logbucheintrag
