@@ -152,9 +152,12 @@ public class MainActivity extends Activity {
                 int blue = Color.blue(pixelColor);
                 int green = Color.green(pixelColor);
 
+                int newRed = red*redFilter;
+                int newBlue = blue*redFilter;
+                int newGreen = green*redFilter;
 
-
-                int newColor = pixelColor*redFilter;
+                int newColor = Color.rgb(newRed,newGreen,newBlue);
+                //int newColor = pixelColor*redFilter;
                 bitmap.setPixel(x,y,newColor);
             }
         }
