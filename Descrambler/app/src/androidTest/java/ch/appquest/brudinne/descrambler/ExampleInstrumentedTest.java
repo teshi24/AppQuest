@@ -1,4 +1,4 @@
-package com.appquest.brudinne.descrambler;
+package ch.appquest.brudinne.descrambler;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.appquest.brudinne.descrambler", appContext.getPackageName());
+        assertEquals("ch.appquest.brudinne.descrambler", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package com.appquest.brudinne.descrambler;
+package ch.appquest.brudinne.descrambler;
 
 import org.junit.Test;
 

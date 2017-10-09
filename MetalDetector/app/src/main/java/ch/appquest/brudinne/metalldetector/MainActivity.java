@@ -59,6 +59,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         metallic.setProgress((int)betrag);
         if(betrag < 30){
             status.setText("You are far away of your treasure.");
+
         }else if(betrag < 60){
             status.setText("You are getting nearer to your treasure.");
         }
@@ -66,6 +67,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             status.setText("You have almost found your treasure!");
         }else{
             status.setText("Treasure found! You made it!");
+            metallic.setProgressTintList(ColorStateList.valueOf(Color.RED));
         }
     }
 
