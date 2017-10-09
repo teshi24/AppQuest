@@ -5,11 +5,17 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.support.v4.content.FileProvider;
@@ -22,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
@@ -30,7 +37,10 @@ public class MainActivity extends Activity {
     //Class variables
     static final int REQUEST_IMAGE_CAPTURE = 1;
     String mCurrentPhotoPath;
-    ImageView mImageView;
+    ImageView imageView;
+    EditText resultText;
+    Button sendResult;
+    Button takePhoto;
     static final int REQUEST_TAKE_PHOTO = 1;
 
     @Override
@@ -38,14 +48,22 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mImageView = (ImageView) findViewById(R.id.imageView1);
+        imageView = (ImageView) findViewById(R.id.imageView);
+        resultText = (EditText) findViewById(R.id.resultText);
+        resultText.setVisibility(View.GONE);
+        sendResult = (Button) findViewById(R.id.sendResult);
+        sendResult.setVisibility(View.GONE);
+        takePhoto  = (Button) findViewById(R.id.takePhoto);
     }
 
+    public void photograph(View view){
+        dispatchTakePictureIntent();
+    }
 
     //Get picture
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        //takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
@@ -53,8 +71,7 @@ public class MainActivity extends Activity {
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
-                // Error occurred while creating the File
-
+                Toast.makeText(this, "File Creation failed", Toast.LENGTH_LONG).show();
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -63,6 +80,15 @@ public class MainActivity extends Activity {
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == REQUEST_TAKE_PHOTO) {
+            if (resultCode == RESULT_OK) {
+                imageView.setImageBitmap(readImageFile(Uri.parse(mCurrentPhotoPath)));
             }
         }
     }
@@ -83,39 +109,8 @@ public class MainActivity extends Activity {
         return image;
     }
 
-    private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
-    }
 
-    private void setPic() {
-        // Get the dimensions of the View
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        mImageView.setImageBitmap(bitmap);
-    }
-
-    //Modify picture
+    //Read picture
     private Bitmap readImageFile(Uri imageUri) {
         File file = new File(imageUri.getPath());
         InputStream iS = null;
@@ -124,7 +119,7 @@ public class MainActivity extends Activity {
             Bitmap bitmap = BitmapFactory.decodeStream(iS);
             return bitmap;
         } catch (FileNotFoundException e) {
-            Log.e("DECODER", "Could not find image file", e);
+            Toast.makeText(this, "Could not find image.", Toast.LENGTH_LONG).show();
             return null;
         } finally {
             if(iS != null) {
@@ -143,6 +138,13 @@ public class MainActivity extends Activity {
 
         bitmap.getPixels(data, 0, width, 0, 0, width, height);
 
+
+        for(int x = 0; x <bitmap.getWidth(); x++){
+            for(int y = 0; y < bitmap.getHeight(); y++){
+                int pixel = bitmap.getPixel(x,y);
+            }
+
+        }
         // Hier können die Pixel im data-array bearbeitet und
         // anschliessend damit ein neues Bitmap erstellt werden
 
@@ -150,7 +152,28 @@ public class MainActivity extends Activity {
     }
 
     // Logbucheintrag
-    private void log(String qrCode) {
+    // --------------
+
+    public void sendResultMethod(View view){
+        log(resultText.getText().toString());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuItem menuItem = menu.add("Log");
+        menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                resultText.setVisibility(View.VISIBLE);
+                sendResult.setVisibility(View.VISIBLE);
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private void log(String result) {
         Intent intent = new Intent("ch.appquest.intent.LOG");
         JSONObject log = new JSONObject();
 
@@ -158,9 +181,10 @@ public class MainActivity extends Activity {
             try {
                 //to test log
                 //log.put("task", "TEST");
-                //log.put("solution", "482ae9");
+                //log.put("solution", "482ae9 " + result);
+                //Bitte einkommentieren
                 log.put("task", "Dechiffrierer");
-                log.put("solution", qrCode);
+                log.put("solution", result);
             } catch (JSONException e) {
             }
             intent.putExtra("ch.appquest.logmessage", log.toString());

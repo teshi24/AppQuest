@@ -17,10 +17,6 @@
             </intent-filter>
         </activity>
 
-        <uses-feature android:name="android.hardware.camera"
-            android:required="true" />
-
-        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="18"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -34,5 +30,10 @@
         </provider>
 
     </application>
+
+    <uses-feature android:name="android.hardware.camera"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="18"/>
 
 </manifest>
