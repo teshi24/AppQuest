@@ -33,8 +33,16 @@ public class MainActivity extends Activity {
     ImageView mImageView;
     static final int REQUEST_TAKE_PHOTO = 1;
 
-    //Get picture
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
+        mImageView = (ImageView) findViewById(R.id.imageView1);
+    }
+
+
+    //Get picture
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -108,7 +116,6 @@ public class MainActivity extends Activity {
     }
 
     //Modify picture
-
     private Bitmap readImageFile(Uri imageUri) {
         File file = new File(imageUri.getPath());
         InputStream iS = null;
@@ -142,9 +149,7 @@ public class MainActivity extends Activity {
         return Bitmap.createBitmap(data, width, height, Bitmap.Config.ARGB_8888);
     }
 
-
     // Logbucheintrag
-
     private void log(String qrCode) {
         Intent intent = new Intent("ch.appquest.intent.LOG");
         JSONObject log = new JSONObject();
@@ -170,6 +175,4 @@ public class MainActivity extends Activity {
         }
         return true;
     }
-
-
 }
