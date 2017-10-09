@@ -27,7 +27,6 @@ public class MainActivity extends Activity implements SensorEventListener {
     private Sensor metallDetector;
     private ProgressBar metallic;
     private TextView status;
-    private Menu mainMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +37,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             metallic.setMin(10);
         }
-        mainMenu = (Menu) findViewById(R.id.menu);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         metallDetector = sensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD).get(0);
