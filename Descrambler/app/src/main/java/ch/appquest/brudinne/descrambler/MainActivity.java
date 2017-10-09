@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Bundle;
@@ -138,12 +139,16 @@ public class MainActivity extends Activity {
 
         bitmap.getPixels(data, 0, width, 0, 0, width, height);
 
+        int redFilter = 0xFF0000;
 
-        for(int x = 0; x <bitmap.getWidth(); x++){
+        Canvas canvas = new Canvas();
+        for(int x = 0; x < bitmap.getWidth(); x++){
             for(int y = 0; y < bitmap.getHeight(); y++){
                 int pixel = bitmap.getPixel(x,y);
-            }
 
+                int newColor = pixel*redFilter;
+                bitmap.setPixel(x,y,newColor);
+            }
         }
         // Hier können die Pixel im data-array bearbeitet und
         // anschliessend damit ein neues Bitmap erstellt werden
