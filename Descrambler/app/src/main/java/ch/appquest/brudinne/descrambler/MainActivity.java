@@ -136,34 +136,27 @@ public class MainActivity extends Activity {
     private Bitmap applyFilter(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-  /*
         int[] data = new int[width * height];
-
         bitmap.getPixels(data, 0, width, 0, 0, width, height);
-        return Bitmap.createBitmap(data, width, height, Bitmap.Config.ARGB_8888);
-*/
-        int redFilter = 0xFF0000;
 
-        Canvas canvas = new Canvas();
-        for(int x = 0; x < width; x++){
+        int redFilter = 0xFFFF0000;
+        int product = width * height;
+
+        for (int i=0; i < product; i++) {
+            int pixelColor = data[i];
+            int newColor = pixelColor*redFilter;
+            data[i] = newColor;
+        }
+
+       /* for(int x = 0; x < width; x++){
             for(int y = 0; y < height; y++){
                 int pixelColor = bitmap.getPixel(x,y);
-                int red = Color.red(pixelColor);
-                int blue = Color.blue(pixelColor);
-                int green = Color.green(pixelColor);
-
-                int newRed = red*redFilter;
-                int newBlue = blue*redFilter;
-                int newGreen = green*redFilter;
-
-                int newColor = Color.rgb(newRed,newGreen,newBlue);
-                //int newColor = pixelColor*redFilter;
+                int newColor = pixelColor*redFilter;
                 bitmap.setPixel(x,y,newColor);
             }
-        }
-        // Hier können die Pixel im data-array bearbeitet und
-        // anschliessend damit ein neues Bitmap erstellt werden
-        return bitmap;
+        }*/
+
+        return Bitmap.createBitmap(data, width, height, Bitmap.Config.ARGB_8888);
     }
 
     // Logbucheintrag
