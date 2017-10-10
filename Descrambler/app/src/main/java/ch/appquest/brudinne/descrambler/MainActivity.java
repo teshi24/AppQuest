@@ -136,11 +136,13 @@ public class MainActivity extends Activity {
     private Bitmap applyFilter(Bitmap bitmap) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        int[] data = new int[width * height];
+
+        int product = width * height;
+
+        int[] data = new int[product+1];
         bitmap.getPixels(data, 0, width, 0, 0, width, height);
 
-        int redFilter = 0xFFFF0000;
-        int product = width * height;
+        int redFilter = 0xFF0000;
 
         for (int i=0; i < product; i++) {
             int pixelColor = data[i];
