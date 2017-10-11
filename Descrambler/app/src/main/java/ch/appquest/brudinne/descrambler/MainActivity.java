@@ -1,8 +1,11 @@
 /**
- * Date:        11.10.2017
- * Version:     1.0
- * Author:      Natalie Stalder, Nadja Stadelmann
- * AppQuest:    App 2 - Dechiffrierer
+ * Date:            11.10.2017
+ * Version:         1.0
+ * Author:          Natalie Stalder, Nadja Stadelmann
+ * AppQuest:        Team:       Brudinne
+ *                  App 2:      Dechiffrierer
+ * Version Test:    Handy:      APK 23
+ *                  Emulator:   APK 26
  */
 package ch.appquest.brudinne.descrambler;
 
@@ -261,10 +264,6 @@ public class MainActivity extends Activity {
 
         if(checkInstalled(intent, "Logbook")) {
             try {
-                //to test log
-                //log.put("task", "TEST");
-                //log.put("solution", "482ae9 " + result);
-                //Bitte einkommentieren
                 log.put("task", "Dechiffrierer");
                 log.put("solution", result);
             } catch (JSONException e) {
