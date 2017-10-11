@@ -42,7 +42,7 @@
 
     <Button
         android:id="@+id/takePhoto"
-        android:onClick="photograph"
+        android:onClick="takePhoto"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="Take Photo"

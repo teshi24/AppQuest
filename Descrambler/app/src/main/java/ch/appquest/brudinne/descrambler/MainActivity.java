@@ -1,3 +1,9 @@
+/**
+ * Date:        11.10.2017
+ * Version:     1.0
+ * Author:      Natalie Stalder, Nadja Stadelmann
+ * AppQuest:    App 2 - Dechiffrierer
+ */
 package ch.appquest.brudinne.descrambler;
 
 import android.app.Activity;
@@ -7,12 +13,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
+import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,23 +38,38 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
+/**
+ * unscramble a red white picture to be able to see a word which is written behind the color
+ */
 public class MainActivity extends Activity {
 
-    //Class variables
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    String mCurrentPhotoPath;
-    ImageView imageView;
-    EditText resultText;
-    Button sendResult;
-    Button takePhoto;
-    static final int REQUEST_TAKE_PHOTO = 1;
+    // variables for taking a picture
+    private Button takePhoto;
+    private static final int REQUEST_TAKE_PHOTO = 1;
+    private String photoPath;
+    private ImageView imageView;
 
+    // variables for sending log message
+    private EditText resultText;
+    private Button sendResult;
+
+    // variables for saving state
+    private static String PHOTO_PATH = "1";
+    private static String RESULT_TEXT = "2";
+
+
+    // android lifecycle handling
+    // --------------------------
+
+    /**
+     * creation of the app - initializes view
+     * @param savedInstanceState
+     */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -58,17 +81,51 @@ public class MainActivity extends Activity {
         takePhoto  = (Button) findViewById(R.id.takePhoto);
     }
 
-    public void photograph(View view){
+    /**
+     * saves state for app restart on pause
+     * @param outState
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString(PHOTO_PATH, photoPath);
+        outState.putString(RESULT_TEXT, resultText.getText().toString());
+
+        super.onSaveInstanceState(outState);
+    }
+
+    /**
+     * set state for app restart to state before on pause
+     * @param savedInstanceState
+     */
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        photoPath = savedInstanceState.getString(PHOTO_PATH);
+        resultText.setText(savedInstanceState.getString(RESULT_TEXT));
+
+        if(photoPath != null){
+            imageView.setImageBitmap(readImageFile(Uri.parse(photoPath)));
+        }
+    }
+
+
+    // photo handling
+    // --------------
+
+    /**
+     * method for Button takePhoto - will be executed on click
+     * @param view
+     */
+    public void takePhoto(View view){
         dispatchTakePictureIntent();
     }
 
-    //Get picture
+    /**
+     * get a picture
+     */
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        //takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
             File photoFile = null;
             try {
                 photoFile = createImageFile();
@@ -86,40 +143,47 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * getting picture from intent and set it to imageView with a red filter
+     * @param requestCode
+     * @param resultCode
+     * @param intent
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == REQUEST_TAKE_PHOTO) {
             if (resultCode == RESULT_OK) {
-                imageView.setImageBitmap(applyFilter(readImageFile(Uri.parse(mCurrentPhotoPath))));
+                imageView.setImageBitmap(readImageFile(Uri.parse(photoPath)));
             }
         }
     }
 
+    /**
+     * create image and get its path
+     * @return
+     * @throws IOException
+     */
     private File createImageFile() throws IOException {
-        // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
+        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+        photoPath = image.getAbsolutePath();
         return image;
     }
 
-
-    //Read picture
+    /**
+     * put file into a bitmap and apply the red filter
+     * @param imageUri
+     * @return
+     */
     private Bitmap readImageFile(Uri imageUri) {
         File file = new File(imageUri.getPath());
         InputStream iS = null;
         try {
             iS = new FileInputStream(file);
             Bitmap bitmap = BitmapFactory.decodeStream(iS);
-            return bitmap;
+            return applyFilter(bitmap);
         } catch (FileNotFoundException e) {
             Toast.makeText(this, "Could not find image.", Toast.LENGTH_LONG).show();
             return null;
@@ -133,41 +197,32 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * set a red filter to bitmap to make its text visible
+     * @param bitmap
+     * @return bitmap with red filter
+     */
     private Bitmap applyFilter(Bitmap bitmap) {
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
+        Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
 
-        int product = width * height;
+        Canvas canvas = new Canvas(mutableBitmap);
+        Paint paint = new Paint();
+        ColorFilter redFilter = new LightingColorFilter(Color.RED, 0);
+        paint.setColorFilter(redFilter);
+        canvas.drawBitmap(mutableBitmap, new Matrix(), paint);
 
-        int[] data = new int[product+1];
-        bitmap.getPixels(data, 0, width, 0, 0, width, height);
-
-        int redFilter = 0xFF0000;
-
-        for (int i=0; i < product; i++) {
-            int pixelColor = data[i];
-            int newColor = pixelColor*redFilter;
-            data[i] = newColor;
-        }
-
-       /* for(int x = 0; x < width; x++){
-            for(int y = 0; y < height; y++){
-                int pixelColor = bitmap.getPixel(x,y);
-                int newColor = pixelColor*redFilter;
-                bitmap.setPixel(x,y,newColor);
-            }
-        }*/
-
-        return Bitmap.createBitmap(data, width, height, Bitmap.Config.ARGB_8888);
+        return mutableBitmap;
     }
 
-    // Logbucheintrag
-    // --------------
 
-    public void sendResultMethod(View view){
-        log(resultText.getText().toString());
-    }
+    // log book handling
+    // ------------------
 
+    /**
+     * prepare log menu button
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuItem menuItem = menu.add("Log");
@@ -175,14 +230,31 @@ public class MainActivity extends Activity {
         menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                resultText.setVisibility(View.VISIBLE);
-                sendResult.setVisibility(View.VISIBLE);
+                if(imageView != null && imageView.getDrawable() != null){
+                    resultText.setVisibility(View.VISIBLE);
+                    sendResult.setVisibility(View.VISIBLE);
+                    return true;
+                }else{
+                    Toast.makeText(MainActivity.this, "Take a picture first to get the answer.", Toast.LENGTH_LONG).show();
+                }
                 return false;
             }
         });
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * method for Button sendResult - will be executed on click
+     * @param view
+     */
+    public void sendResultMethod(View view){
+        log(resultText.getText().toString());
+    }
+
+    /**
+     * send log message to Logbook
+     * @param result
+     */
     private void log(String result) {
         Intent intent = new Intent("ch.appquest.intent.LOG");
         JSONObject log = new JSONObject();
@@ -202,6 +274,12 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * checks, if an app is installed
+     * @param intent
+     * @param appName
+     * @return
+     */
     private boolean checkInstalled(Intent intent, String appName){
         if (getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
             Toast.makeText(this, appName + " App not Installed", Toast.LENGTH_LONG).show();
