@@ -8,6 +8,12 @@
     android:weightSum="2"
     tools:context="ch.appquest.brudinne.memory.MainActivity">
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </android.support.v7.widget.RecyclerView>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="250dp"

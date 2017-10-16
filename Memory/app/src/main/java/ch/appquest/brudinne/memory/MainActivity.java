@@ -2,10 +2,12 @@ package ch.appquest.brudinne.memory;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +20,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
+
+    private String resultArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +55,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void setMemoryPicture(Bitmap bmp, String word){
+
+    }
+
     RecyclerView rv = (RecyclerView)findViewById(R.id.recyclerView);
+    //adapter = new CustomAdapter(getApplicationContext(),ApplicationState.getGridElements());
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
     rv.setLayoutManager(gridLayoutManager);
 
@@ -90,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         if(checkInstalled(intent, "Logbook")) {
             try {
                 log.put("task", "Dechiffrierer");
-                log.put("solution", result);
+                log.put("solution", resultArray);
             } catch (JSONException e) {
             }
             intent.putExtra("ch.appquest.logmessage", log.toString());
