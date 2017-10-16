@@ -4,10 +4,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+
+import com.google.zxing.client.android.Intents;
+import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
     rv.setLayoutManager(gridLayoutManager);
 
+
     // log message handling
     // --------------------
 
@@ -65,31 +71,13 @@ public class MainActivity extends AppCompatActivity {
         menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                if(checkInstalled(intent, "Zxing Barcode Scanner")){
-                    startActivityForResult(intent, SCAN_QR_CODE_REQUEST_CODE);
-                }
+
                 return false;
             }
         });
         return super.onCreateOptionsMenu(menu);
     }
 
-    /**
-     * get result from QR-Code Intent
-     * @param requestCode
-     * @param resultCode
-     * @param intent
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if (requestCode == SCAN_QR_CODE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                log(intent.getStringExtra("SCAN_RESULT"));
-            }
-        }
-    }
 
     /**
      * send log message to Logbook
@@ -101,17 +89,18 @@ public class MainActivity extends AppCompatActivity {
 
         if(checkInstalled(intent, "Logbook")) {
             try {
-                log.put("task", "Metalldetektor");
-                log.put("solution", qrCode);
+                log.put("task", "Dechiffrierer");
+                log.put("solution", result);
             } catch (JSONException e) {
             }
             intent.putExtra("ch.appquest.logmessage", log.toString());
             startActivity(intent);
         }
+
     }
 
     /**
-     * checks if an application is installed
+     * checks, if an app is installed
      * @param intent
      * @param appName
      * @return
@@ -123,4 +112,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
 }
