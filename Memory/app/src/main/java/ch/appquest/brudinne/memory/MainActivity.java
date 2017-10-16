@@ -4,16 +4,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,10 +30,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
+    private ArrayList<View> list;
     private JSONArray jsonArray;
     private String currentPhotoPath;
 
@@ -53,6 +51,14 @@ public class MainActivity extends AppCompatActivity {
         //adapter = new CustomAdapter(getApplicationContext(),ApplicationState.getGridElements());
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
         rv.setLayoutManager(gridLayoutManager);
+
+        list = new ArrayList<>();
+        createNewCards(0,1);
+
+        RecyclerView.Adapter adapter = new MyAdapter(list, this);
+        rv.setAdapter(adapter);
+        createNewCards(2,3);
+        ((Button)list.get(3).findViewById(R.id.buttonLeft)).setVisibility(View.GONE);
         Button button1 = (Button)findViewById(R.id.newCard);
         Button newButton = (Button)findViewById(R.id.newCard);
         newButton.setOnClickListener(new View.OnClickListener(){
@@ -60,6 +66,11 @@ public class MainActivity extends AppCompatActivity {
                 takeQrCodePicture();
             }
         });
+    }
+
+    private void createNewCards(int ind1, int ind2){
+        list.add(ind1, new View(this));
+        list.add(ind2, new View(this));
     }
 
     /**

@@ -38,12 +38,12 @@
                 android:id="@+id/textLeft"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Your work is going to fill a large part of your life."
+                android:text="Part of your life."
                 android:layout_below="@id/imageLeft"
                 />
         </RelativeLayout>
     </android.support.v7.widget.CardView>
-    <android.support.v7.widget.CardView
+   <!-- <android.support.v7.widget.CardView
         android:id="@+id/cardViewRight"
         card_view:cardElevation="10dp"
         android:layout_toRightOf="@id/cardViewLeft"
@@ -77,9 +77,10 @@
                 android:id="@+id/textRight"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Your work is going to fill a large part of your life."
+                android:text="Part of your life."
                 android:layout_below="@id/imageRight"
                 />
         </RelativeLayout>
     </android.support.v7.widget.CardView>
+    -->
 </LinearLayout>
