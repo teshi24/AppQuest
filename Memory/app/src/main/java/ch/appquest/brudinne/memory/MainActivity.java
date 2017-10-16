@@ -81,11 +81,13 @@ public class MainActivity extends AppCompatActivity {
         menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                /*
                 if(){
 
                 } else {
                     Toast.makeText(this, "No results to log.", Toast.LENGTH_LONG).show();
                 }
+                */
                 return false;
             }
         });
