@@ -30,31 +30,41 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         // each data item is just a string in this case
         public LinearLayout matchView;
 
-        public CardView cardLeft;
-        public Button buttonLeft;
-        public ImageView imageLeft;
-        public TextView textLeft;
-
-        public CardView cardRight;
-        public Button buttonRight;
-        public ImageView imageRight;
-        public TextView textRight;
+        public CardView card;
+        public Button button;
+        public ImageView image;
+        public TextView text;
 
         public ViewHolder(LinearLayout matchView) {
             super(matchView);
             this.matchView = matchView;
 
-            cardLeft = (CardView) matchView.findViewById(R.id.cardViewLeft);
-            buttonLeft = (Button) matchView.findViewById(R.id.buttonLeft);
-            imageLeft = (ImageView) matchView.findViewById(R.id.imageLeft);
-            textLeft = (TextView) matchView.findViewById(R.id.textLeft);
-/*
-            cardRight = (CardView) matchView.findViewById(R.id.cardViewRight);
-            buttonRight = (Button) matchView.findViewById(R.id.buttonRight);
-            imageRight = (ImageView) matchView.findViewById(R.id.imageRight);
-            textRight = (TextView) matchView.findViewById(R.id.textRight);
-            */
+            card = (CardView) matchView.findViewById(R.id.cardView);
+
+            if(image != null) {
+                image = (ImageView) matchView.findViewById(R.id.image);
+                text = (TextView) matchView.findViewById(R.id.text);
+            } else{
+                button = (Button) matchView.findViewById(R.id.button);
+            }
         }
+    }
+
+    public void deleteButton(ViewGroup parent, int position){
+
+        LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.match, parent, false);
+        CardView card = (CardView) matchView.findViewById(R.id.cardView);
+        ImageView image = (ImageView) matchView.findViewById(R.id.image);
+        TextView text = (TextView) matchView.findViewById(R.id.text);
+
+        dataset.set(position, matchView);
+        ///((Button)dataset.get(3).findViewById(R.id.button)).setVisibility(View.GONE);
+        new ViewHolder(matchView);
+    }
+
+    public void createNewCards(int ind1, int ind2){
+        dataset.add(ind1, new View(activity));
+        dataset.add(ind2, new View(activity));
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
@@ -77,19 +87,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @Override
     public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                    int viewType) {
-        LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.match, parent, false);
 
-        CardView cardLeft = (CardView) matchView.findViewById(R.id.cardViewLeft);
-        Button buttonLeft = (Button) matchView.findViewById(R.id.buttonLeft);
-        ImageView imageLeft = (ImageView) matchView.findViewById(R.id.imageLeft);
-        TextView textLeft = (TextView) matchView.findViewById(R.id.textLeft);
+        LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.button, parent, false);
+        Button button = (Button) matchView.findViewById(R.id.button);
 
         /*
-        CardView cardRight = (CardView) matchView.findViewById(R.id.cardViewRight);
-        Button buttonRight = (Button) matchView.findViewById(R.id.buttonRight);
-        ImageView imageRight = (ImageView) matchView.findViewById(R.id.imageRight);
-        TextView textRight = (TextView) matchView.findViewById(R.id.textRight);
-*/
+        LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.match, parent, false);
+        CardView card = (CardView) matchView.findViewById(R.id.cardView);
+        ImageView image = (ImageView) matchView.findViewById(R.id.image);
+        TextView text = (TextView) matchView.findViewById(R.id.text);
+        */
+
         // set the view's size, margins, paddings and layout parameters
 
         return new ViewHolder(matchView);
@@ -104,7 +112,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         View currentView = dataset.get(position);
 
-        ((TextView)holder.matchView.findViewById(R.id.textLeft)).setText("test");
+        ((TextView)holder.matchView.findViewById(R.id.text)).setText("test");
 
         Toast.makeText(activity, "here comes the bind view holder", Toast.LENGTH_LONG);
     }

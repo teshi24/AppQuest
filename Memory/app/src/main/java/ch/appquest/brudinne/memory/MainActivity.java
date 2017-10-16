@@ -7,15 +7,11 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.client.android.Intents;
@@ -35,6 +31,8 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
+    private RecyclerView rv;
+    private MyAdapter adapter;
     private ArrayList<View> list;
     private JSONArray jsonArray;
     private String currentPhotoPath;
@@ -47,28 +45,37 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        RecyclerView rv = (RecyclerView)findViewById(R.id.recyclerView);
+        rv = (RecyclerView)findViewById(R.id.recyclerView);
         //adapter = new CustomAdapter(getApplicationContext(),ApplicationState.getGridElements());
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
         rv.setLayoutManager(gridLayoutManager);
 
         list = new ArrayList<>();
-        createNewCards(0,1);
 
-        RecyclerView.Adapter adapter = new MyAdapter(list, this);
+        adapter = new MyAdapter(list, this);
         rv.setAdapter(adapter);
+
+        createNewCards(0,1);
         createNewCards(2,3);
-        ((Button)list.get(3).findViewById(R.id.buttonLeft)).setVisibility(View.GONE);
-        Button button1 = (Button)findViewById(R.id.newCard);
-        Button newButton = (Button)findViewById(R.id.newCard);
+                /*
+        adapter.createNewCards(0,1);
+        adapter.createNewCards(2,3);
+         */
+
+//        Button button1 = (Button)findViewById(R.id.newCard);
+   /*     Button newButton = (Button)findViewById(R.id.newCard);
         newButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 takeQrCodePicture();
             }
-        });
+        });*/
     }
 
-    private void createNewCards(int ind1, int ind2){
+    public void onStart(){
+        adapter.deleteButton(rv, 2);
+    }
+
+    public void createNewCards(int ind1, int ind2){
         list.add(ind1, new View(this));
         list.add(ind2, new View(this));
     }
@@ -115,12 +122,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setMemoryPicture(Bitmap bmp, String word){
+        /*
         ImageView imageView = new ImageView();
         TextView textView   = new TextView();
         CardView cardView   = new CardView();
         cardView.addView(imageView);
         cardView.addView(textView);
-
+        */
     }
 
 
