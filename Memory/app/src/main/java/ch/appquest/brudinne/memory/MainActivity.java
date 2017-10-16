@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                 savePicture(BitmapFactory.decodeFile(path), code, 1);
             } catch (IOException e) {
                 e.printStackTrace();
-            } 
+            }
         }
 
     }
