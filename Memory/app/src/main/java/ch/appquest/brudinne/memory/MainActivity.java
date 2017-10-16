@@ -16,17 +16,23 @@ import android.widget.Toast;
 import com.google.zxing.client.android.Intents;
 import com.google.zxing.integration.android.IntentIntegrator;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
     private String resultArray;
+    private JSONArray jsonArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        RecyclerView rv = (RecyclerView)findViewById(R.id.recyclerView);
+        //adapter = new CustomAdapter(getApplicationContext(),ApplicationState.getGridElements());
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
+        rv.setLayoutManager(gridLayoutManager);
     }
 
     public void takeQrCodePicture() {
@@ -59,11 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    RecyclerView rv = (RecyclerView)findViewById(R.id.recyclerView);
-    //adapter = new CustomAdapter(getApplicationContext(),ApplicationState.getGridElements());
-    GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
-    rv.setLayoutManager(gridLayoutManager);
-
 
     // log message handling
     // --------------------
@@ -80,7 +81,11 @@ public class MainActivity extends AppCompatActivity {
         menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                if(){
 
+                } else {
+                    Toast.makeText(this, "No results to log.", Toast.LENGTH_LONG).show();
+                }
                 return false;
             }
         });
@@ -98,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(checkInstalled(intent, "Logbook")) {
             try {
-                log.put("task", "Dechiffrierer");
+                log.put("task", "Memory");
                 log.put("solution", resultArray);
             } catch (JSONException e) {
             }
