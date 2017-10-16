@@ -3,12 +3,14 @@ package ch.appquest.brudinne.memory;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.client.android.Intents;
@@ -50,6 +54,12 @@ public class MainActivity extends AppCompatActivity {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
         rv.setLayoutManager(gridLayoutManager);
         Button button1 = (Button)findViewById(R.id.newCard);
+        Button newButton = (Button)findViewById(R.id.newCard);
+        newButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                takeQrCodePicture();
+            }
+        });
     }
 
     /**
@@ -84,10 +94,21 @@ public class MainActivity extends AppCompatActivity {
 
             String code = extras.getString(
                     Intents.Scan.RESULT);
+            try {
+                savePicture(BitmapFactory.decodeFile(path), code, 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } 
         }
+
     }
 
     private void setMemoryPicture(Bitmap bmp, String word){
+        ImageView imageView = new ImageView();
+        TextView textView   = new TextView();
+        CardView cardView   = new CardView();
+        cardView.addView(imageView);
+        cardView.addView(textView);
 
     }
 

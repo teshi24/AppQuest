@@ -16,10 +16,10 @@
     </android.support.v7.widget.RecyclerView>
     <Button
         android:id="@id/newCard"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="75dp"
+        android:layout_height="50dp"
         android:src="@drawable/photo"
-        android:background="white"
+        android:background="@drawable/photo"
         />
     <LinearLayout
         android:layout_width="match_parent"
