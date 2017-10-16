@@ -5,48 +5,117 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="3dp"
+    android:weightSum="2"
     tools:context="ch.appquest.brudinne.memory.MainActivity">
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/card_view"
-        card_view:cardElevation="10dp"
-        android:layout_centerHorizontal="true"
-        android:layout_width="500dp"
-        android:layout_height="wrap_content"
-        card_view:cardBackgroundColor="@color/accent_material_light"
-        android:stateListAnimator="@drawable/button_style_custom"
-        card_view:cardCornerRadius="7dp">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        <TextView
-            android:id="@+id/info_text"
-            android:layout_width="match_parent"
+    <!--
+        <Button
+            android:id="@+id/buttonLeft"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work. And the only way to do great work is to love what you do. If you haven’t found it yet, keep looking. Don’t settle. As with all matters of the heart, you’ll know when you find it."
-        />
-
-        <ImageView
-            android:id="@+id/image"
-            android:layout_below="@id/info_text"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:paddingTop="20dp"
+            android:text="Press Me"
             android:layout_marginTop="20dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/pic_one"/>
-        </RelativeLayout>
-    </android.support.v7.widget.CardView>
+            android:layout_alignParentTop="true"
+            android:layout_weight="1"
+            android:layout_gravity="left"
+            android:gravity="left"/>
 
-    <Button
-        android:id="@+id/button"
+        <Button
+            android:id="@+id/buttonRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp"
+            android:text="Press Me"
+            android:layout_marginTop="20dp"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@id/buttonLeft"
+            android:layout_weight="1"
+            android:layout_gravity="right"
+            android:gravity="right"/>
+    -->
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:paddingTop="20dp"
-        android:text="Press Me"
-        android:layout_marginTop="20dp"
-        android:stateListAnimator="@drawable/button_style_custom"
-        android:layout_below="@+id/card_view"/>
+        android:layout_height="250dp"
+        android:orientation="horizontal"
+        android:layout_weight="1">
 
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardViewLeft"
+            card_view:cardElevation="10dp"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="left"
+            android:gravity="left"
+            card_view:cardBackgroundColor="@color/accent_material_light"
+            card_view:cardCornerRadius="dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <Button
+                    android:id="@+id/buttonLeft"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Press Me"
+                    android:layout_alignParentTop="true"/>
+                <ImageView
+                    android:id="@+id/imageLeft"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="20dp"
+                    android:scaleType="fitXY"
+                    android:layout_alignParentTop="true"/>
+                <TextView
+                    android:id="@+id/textLeft"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Your work is going to fill a large part of your life."
+                    android:layout_below="@id/imageLeft"
+                    />
+            </RelativeLayout>
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+            android:id="@+id/card_view"
+            card_view:cardElevation="10dp"
+            android:layout_toRightOf="@id/cardViewLeft"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="right"
+            android:gravity="right"
+            card_view:cardBackgroundColor="@color/accent_material_light"
+            card_view:cardCornerRadius="7dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <Button
+                    android:id="@+id/buttonRight"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Press Me"
+                    android:layout_alignParentTop="true"/>
+                <ImageView
+                    android:id="@+id/imageRight"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="20dp"
+                    android:scaleType="fitXY"
+                    android:layout_alignParentTop="true"/>
+                <TextView
+                    android:id="@+id/textRight"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Your work is going to fill a large part of your life."
+                    android:layout_below="@id/imageRight"
+                    />
+            </RelativeLayout>
+        </android.support.v7.widget.CardView>
+    </LinearLayout>
 </RelativeLayout>
