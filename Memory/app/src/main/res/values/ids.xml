@@ -3,4 +3,5 @@
     <item name="recylerView" type="id" />
     <item name="gridLayoutManager" type="id" />
     <item name="recyclerView" type="id" />
+    <item name="newCard" type="id" />
 </resources>

@@ -3,6 +3,10 @@ package ch.appquest.brudinne.memory;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -11,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.zxing.client.android.Intents;
@@ -20,11 +25,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
 
-    private String resultArray;
     private JSONArray jsonArray;
+    private String currentPhotoPath;
 
+    /**
+     * on create method
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,8 +49,12 @@ public class MainActivity extends AppCompatActivity {
         //adapter = new CustomAdapter(getApplicationContext(),ApplicationState.getGridElements());
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
         rv.setLayoutManager(gridLayoutManager);
+        Button button1 = (Button)findViewById(R.id.newCard);
     }
 
+    /**
+     * onklick button "take picture"
+     */
     public void takeQrCodePicture() {
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setCaptureActivity(MyCaptureActivity.class);
@@ -44,6 +64,12 @@ public class MainActivity extends AppCompatActivity {
         integrator.initiateScan();
     }
 
+    /**
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == IntentIntegrator.REQUEST_CODE
@@ -66,6 +92,56 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void savePicture(Bitmap picture, String word, int index) throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String tempFilePath = Environment.getExternalStorageDirectory() + "/" + index + "_" + word + "_" + timeStamp +".jpg";
+
+        File tempFile = new File(tempFilePath);
+        if (!tempFile.exists()) {
+            if (!tempFile.getParentFile().exists()) {
+                tempFile.getParentFile().mkdirs();
+            }
+        }
+
+        tempFile.delete();
+        tempFile.createNewFile();
+
+        int quality = 100;
+        FileOutputStream fileOutputStream = new FileOutputStream(tempFile);
+
+        BufferedOutputStream bos = new BufferedOutputStream(fileOutputStream);
+        picture.compress(Bitmap.CompressFormat.JPEG, quality, bos);
+
+        bos.flush();
+        bos.close();
+
+        picture.recycle();
+
+        //return tempFilePath;
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile(word);
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+            }
+        }
+    }
+
+
     // log message handling
     // --------------------
 
@@ -81,11 +157,12 @@ public class MainActivity extends AppCompatActivity {
         menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if(){
-
-                } else {
-                    Toast.makeText(this, "No results to log.", Toast.LENGTH_LONG).show();
+                if(jsonArray != null){
+                    String resultArray = jsonArray.toString();
+                    log(resultArray);
+                    return true;
                 }
+                Toast.makeText(MainActivity.this, "No results to log.", Toast.LENGTH_LONG).show();
                 return false;
             }
         });
@@ -95,9 +172,9 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * send log message to Logbook
-     * @param qrCode
+     * @param resultArray
      */
-    private void log(String qrCode) {
+    private void log(String resultArray) {
         Intent intent = new Intent("ch.appquest.intent.LOG");
         JSONObject log = new JSONObject();
 
