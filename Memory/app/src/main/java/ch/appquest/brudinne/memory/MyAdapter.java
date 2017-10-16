@@ -12,12 +12,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 /**
  * Created by Nadja on 16.10.2017.
  */
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-    private String[] dataset;
+    private ArrayList<View> dataset;
+    private View[] dataset2;
     private Activity activity;
 
     // Provide a reference to the views for each data item
@@ -40,13 +43,29 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         public ViewHolder(LinearLayout matchView) {
             super(matchView);
             this.matchView = matchView;
+
+            cardLeft = (CardView) matchView.findViewById(R.id.cardViewLeft);
+            buttonLeft = (Button) matchView.findViewById(R.id.buttonLeft);
+            imageLeft = (ImageView) matchView.findViewById(R.id.imageLeft);
+            textLeft = (TextView) matchView.findViewById(R.id.textLeft);
+/*
+            cardRight = (CardView) matchView.findViewById(R.id.cardViewRight);
+            buttonRight = (Button) matchView.findViewById(R.id.buttonRight);
+            imageRight = (ImageView) matchView.findViewById(R.id.imageRight);
+            textRight = (TextView) matchView.findViewById(R.id.textRight);
+            */
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAdapter(String[] dataset, Activity activity) {
-        dataset = dataset;
-        activity = activity;
+    public MyAdapter(View[] dataset, Activity activity) {
+        this.dataset2 = dataset;
+        this.activity = activity;
+    }
+    // Provide a suitable constructor (depends on the kind of dataset)
+    public MyAdapter(ArrayList<View> dataset, Activity activity) {
+        this.dataset = dataset;
+        this.activity = activity;
     }
 
     /**
@@ -64,12 +83,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         Button buttonLeft = (Button) matchView.findViewById(R.id.buttonLeft);
         ImageView imageLeft = (ImageView) matchView.findViewById(R.id.imageLeft);
         TextView textLeft = (TextView) matchView.findViewById(R.id.textLeft);
-        
+
+        /*
         CardView cardRight = (CardView) matchView.findViewById(R.id.cardViewRight);
         Button buttonRight = (Button) matchView.findViewById(R.id.buttonRight);
         ImageView imageRight = (ImageView) matchView.findViewById(R.id.imageRight);
         TextView textRight = (TextView) matchView.findViewById(R.id.textRight);
-
+*/
         // set the view's size, margins, paddings and layout parameters
 
         return new ViewHolder(matchView);
@@ -80,13 +100,19 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        //holder.matchView.findViewById(R.id.textLeft).setText(dataset[position]);
+        //View currentView = dataset2[position];
+
+        View currentView = dataset.get(position);
+
+        ((TextView)holder.matchView.findViewById(R.id.textLeft)).setText("test");
+
         Toast.makeText(activity, "here comes the bind view holder", Toast.LENGTH_LONG);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return dataset.length;
+        return dataset.size();
+        //return dataset2.length;
     }
 }
