@@ -19,7 +19,6 @@ import java.util.ArrayList;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     private ArrayList<View> dataset;
-    private View[] dataset2;
     private Activity activity;
 
     // Provide a reference to the views for each data item
@@ -30,7 +29,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         public LinearLayout matchView;
 
         public CardView card;
-        public Button button;
+        public Button newCard;
+        public Button newCardPhoto;
+
+
         public ImageView image;
         public TextView text;
 
@@ -44,7 +46,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                 image = (ImageView) matchView.findViewById(R.id.image);
                 text = (TextView) matchView.findViewById(R.id.text);
             } else{
-                button = (Button) matchView.findViewById(R.id.button);
+                newCard = (Button) matchView.findViewById(R.id.newCard);
+                newCardPhoto = (Button) matchView.findViewById(R.id.newCardPhoto);
             }
         }
 
@@ -64,12 +67,19 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             this.card = card;
         }
 
-        public Button getButton() {
-            return button;
+        public Button getNewCard() {
+            return newCard;
         }
 
-        public void setButton(Button button) {
-            this.button = button;
+        public void setNewCard(Button newCard) {
+            this.newCard = newCard;
+        }
+        public Button getNewCardPhoto() {
+            return newCardPhoto;
+        }
+
+        public void setNewCardPhoto(Button newCardPhoto) {
+            this.newCardPhoto = newCardPhoto;
         }
 
         public ImageView getImage() {
@@ -96,20 +106,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         TextView text = (TextView) matchView.findViewById(R.id.text);
 
         dataset.set(position, matchView);
-        ///((Button)dataset.get(3).findViewById(R.id.button)).setVisibility(View.GONE);
+        ///((Button)dataset.get(3).findViewById(R.id.newCard)).setVisibility(View.GONE);
         new ViewHolder(matchView);
     }
 
-    public void createNewCards(int ind1, int ind2){
-        dataset.add(ind1, new View(activity));
-        dataset.add(ind2, new View(activity));
-    }
-
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAdapter(View[] dataset, Activity activity) {
-        this.dataset2 = dataset;
-        this.activity = activity;
-    }
     // Provide a suitable constructor (depends on the kind of dataset)
     public MyAdapter(ArrayList<View> dataset, Activity activity) {
         this.dataset = dataset;
@@ -127,7 +127,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                                                    int viewType) {
 
         LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.button, parent, false);
-        Button button = (Button) matchView.findViewById(R.id.button);
+        Button button = (Button) matchView.findViewById(R.id.newCard);
 
         /*
         LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.match, parent, false);
@@ -146,20 +146,18 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        //View currentView = dataset2[position];
 
         //((TextView)holder.matchView.findViewById(R.id.text)).setText("test");
 
         View currentView = dataset.get(position);
-        holder.text.setText(dataset.get(position).toString());
-        holder.button.setVisibility(currentView.getVisibility());
-        //.setText(currentView.getButton());
+        //holder.text.setText(dataset.get(position).toString());
+        holder.newCard.setVisibility(currentView.getVisibility());
+        //.setText(currentView.getNewCard());
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return dataset.size();
-        //return dataset2.length;
     }
 }
