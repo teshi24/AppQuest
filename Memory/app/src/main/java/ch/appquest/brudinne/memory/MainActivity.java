@@ -25,7 +25,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -40,12 +39,16 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rv;
     private MyAdapter adapter;
     private ArrayList<View> list;
-    private JSONArray jsonArray;
     private String currentPhotoPath;
+
+    private JSONArray pairValues;
     public static  final String FILE_NAME = "MyJsonFile";
     public static final String STRING_NAME = "JSON";
-    private File PICTURE_FILE;
-    private String PICTURE_NAME;
+
+    private String PICTURE_NAME; // name of picture file
+    private String PICTURE_PATH; // path of saved picture (without name)
+    private File PICTURE_FILE;   // picture file with standard app internal storage path and picture name
+
     // TODO Natalie: change string to picture bitmap save variable
     //private String PICTURE_NAME = "hello world!";
 
@@ -59,7 +62,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Get saved instance of JSON-Array with Name-Pairs and their links of pictures
         SharedPreferences settings = getSharedPreferences(FILE_NAME, 0);
-        String memoryPairs = settings.getString("silentMode", null);
+        String memoryPairs = settings.getString("JSON", null);
+        if(memoryPairs != null){
+            makeJsonArray(memoryPairs);
+        } else {
+            Toast.makeText(this, "No saved pictures.", Toast.LENGTH_LONG).show();
+        }
 
         setContentView(R.layout.activity_main);
         rv = (RecyclerView)findViewById(R.id.recyclerView);
@@ -149,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 savePicture(BitmapFactory.decodeFile(path), code /*, 1*/);
             } catch (IOException e) {
+                //TODO Natalie: check errorhandling
                 e.printStackTrace();
             }
         }
@@ -165,8 +174,43 @@ public class MainActivity extends AppCompatActivity {
         */
     }
 
+    private void makeJsonArray(String jsonMemory){
+        try {
+            pairValues = new JSONArray(jsonMemory);
+            for(int i = 0; i < pairValues.length(); i++){
+                JSONObject pair = pairValues.getJSONObject(i);
+                JSONArray memoryPair = pair.getJSONArray("Pair");
+                for(int p = 0; i < memoryPair.length(); i++){
+                    JSONObject picture = memoryPair.getJSONObject(i);
+                    String description = picture.getString("name");
+                    PICTURE_PATH       = picture.getString("filepath");
+                    PICTURE_NAME    = picture.getString("filename");
+                    // TODO Natalie: implement insert from picture and description in app
+                    if(description != "null" && PICTURE_NAME != "null" && PICTURE_PATH != "null"){
+                        loadImageFromStorage();
+                    } else {
+                        // TODO Natalie: check that nothing is inserted where the empty picture should bee...
+                    }
+                }
+            }
+        } catch(JSONException e) {
+            //TODO Natalie: check errorhandling
+            e.printStackTrace();
+        }
 
-    private String savePicture(Bitmap picture, String word /*, int index*/) throws IOException {
+    }
+
+    private void savePicturesAndJson(){
+        try{
+            pairValues.toString();
+        } catch(Exception e){
+            //TODO Natalie: check errorhandling
+            e.printStackTrace();
+        }
+    }
+
+
+    private void savePicture(Bitmap picture, String word /*, int index*/) throws IOException {
         // Create Filename for picture
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         PICTURE_NAME = Environment.getExternalStorageDirectory() + "/" + word + "_" + timeStamp +".jpg";
@@ -180,14 +224,16 @@ public class MainActivity extends AppCompatActivity {
             fos = new FileOutputStream(PICTURE_FILE);
             picture.compress(Bitmap.CompressFormat.JPEG, 100, fos);
         } catch (Exception e){
+            //TODO Natalie: check errorhandling
             e.printStackTrace();
         } finally {
             try {
                 fos.close();
             } catch (IOException e) {
+                //TODO Natalie: check errorhandling
                 e.printStackTrace();
             }
-            return directory.getAbsolutePath();
+            PICTURE_PATH = directory.getAbsolutePath();
         }
         /*File tempFile = new File(tempFilePath);
         if (!tempFile.exists()) {
@@ -214,11 +260,10 @@ public class MainActivity extends AppCompatActivity {
         //return tempFilePath;
     }
 
-    private void loadImageFromStorage(String path)
+    private void loadImageFromStorage()
     {
-
         try {
-            File f = new File(path, "profile.jpg");
+            File f = new File(PICTURE_PATH, PICTURE_NAME);
             Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
             ImageView img=(ImageView)findViewById(R.id.image);
             img.setImageBitmap(b);
