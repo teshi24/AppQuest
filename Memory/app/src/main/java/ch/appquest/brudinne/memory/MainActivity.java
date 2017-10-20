@@ -291,8 +291,8 @@ public class MainActivity extends AppCompatActivity {
         menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if(jsonArray != null){
-                    String resultArray = jsonArray.toString();
+                if(pairValues != null){
+                    String resultArray = pairValues.toString();
                     log(resultArray);
                     return true;
                 }
