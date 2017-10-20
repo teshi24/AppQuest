@@ -40,7 +40,9 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rv;
     private MyAdapter adapter;
     private ArrayList<View> list;
-    private String currentPhotoPath;
+    //private String currentPhotoPath;
+
+    private SharedPreferences settings;
 
     private JSONArray pairValues;
     public static  final String FILE_NAME = "MyJsonFile";
@@ -62,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Get saved instance of JSON-Array with Name-Pairs and their links of pictures
-        SharedPreferences settings = getSharedPreferences(FILE_NAME, 0);
+        settings = getSharedPreferences(FILE_NAME, 0);
         String memoryPairs = settings.getString("JSON", null);
         if(memoryPairs != null){
             try {
@@ -99,10 +101,10 @@ public class MainActivity extends AppCompatActivity {
         // Saving JSON-Array before app gets hidden
         // We need an Editor object to make preference changes.
         // All objects are from android.context.Context
-        SharedPreferences settings = getSharedPreferences(FILE_NAME, 0);
+        settings = getSharedPreferences(FILE_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         // TODO: entcomment!
-        //editor.putString("JSON", mSilentMode);
+        editor.putString(STRING_NAME, pairValues.toString());
 
         // Committing the edits
         editor.commit();

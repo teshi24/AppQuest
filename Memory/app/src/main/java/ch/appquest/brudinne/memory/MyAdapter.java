@@ -38,12 +38,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         public ImageView image;
         public TextView text;
 
-        public ViewHolder(LinearLayout matchView) {
+        public ViewHolder(LinearLayout matchView, int type) {
             super(matchView);
             this.matchView = matchView;
 
-
-            if(image != null) {
+            if(type == 1) {
                 card = (CardView) matchView.findViewById(R.id.pictureView);
                 image = (ImageView) matchView.findViewById(R.id.image);
                 text = (TextView) matchView.findViewById(R.id.text);
@@ -104,13 +103,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     public void deleteButton(ViewGroup parent, int position){
         LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.match, parent, false);
-        CardView card = (CardView) matchView.findViewById(R.id.pictureView);
+        CardView card   = (CardView) matchView.findViewById(R.id.pictureView);
         ImageView image = (ImageView) matchView.findViewById(R.id.image);
-        TextView text = (TextView) matchView.findViewById(R.id.text);
+        TextView text   = (TextView) matchView.findViewById(R.id.text);
 
         dataset.set(position, matchView);
         ///((Button)dataset.get(3).findViewById(R.id.newCard)).setVisibility(View.GONE);
-        new ViewHolder(matchView);
+        new ViewHolder(matchView, 1);
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
@@ -131,6 +130,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.button, parent, false);
         Button button = (Button) matchView.findViewById(R.id.newCard);
+        int type = 0;
 
         /*
         LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.match, parent, false);
@@ -141,7 +141,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         // set the view's size, margins, paddings and layout parameters
 
-        return new ViewHolder(matchView);
+        return new ViewHolder(matchView, type);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
