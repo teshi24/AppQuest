@@ -36,7 +36,6 @@
                 android:src="@drawable/photo"
                 android:background="@drawable/photo"
                 android:layout_centerInParent="true"
-                android:foregroundGravity="top"
                 android:onClick="takeQrCodePicture"/>
         </RelativeLayout>
     </android.support.v7.widget.CardView>

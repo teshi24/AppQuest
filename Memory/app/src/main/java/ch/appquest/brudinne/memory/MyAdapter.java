@@ -1,6 +1,7 @@
 package ch.appquest.brudinne.memory;
 
 import android.app.Activity;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -21,9 +22,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     private ArrayList<View> dataset;
     private Activity activity;
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
+    /**
+     * Provide a reference to the views for each data item
+     * Complex data items may need more than one view per item, and
+     * you provide access to all the views for a data item in a view holder
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public LinearLayout matchView;
@@ -48,6 +51,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             } else{
                 newCard = (Button) matchView.findViewById(R.id.newCard);
                 newCardPhoto = (Button) matchView.findViewById(R.id.newCardPhoto);
+                //newCardPhoto.bringToFront();
+                ViewCompat.setTranslationZ(newCardPhoto, 1);
             }
         }
 
@@ -148,7 +153,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         // - replace the contents of the view with that element
 
         //((TextView)holder.matchView.findViewById(R.id.text)).setText("test");
-
         View currentView = dataset.get(position);
         //holder.text.setText(dataset.get(position).toString());
         holder.newCard.setVisibility(currentView.getVisibility());

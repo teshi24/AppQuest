@@ -25,7 +25,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -72,7 +71,8 @@ public class MainActivity extends AppCompatActivity {
         adapter = new MyAdapter(list, this);
         rv.setAdapter(adapter);
 
-        createNewCards(0,1);
+        createFirstRow();
+
         createNewCards(2,3);
                 /*
         adapter.createNewCards(0,1);
@@ -97,7 +97,8 @@ public class MainActivity extends AppCompatActivity {
         // All objects are from android.context.Context
         SharedPreferences settings = getSharedPreferences(FILE_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString("JSON", mSilentMode);
+        // TODO: entcomment!
+        //editor.putString("JSON", mSilentMode);
 
         // Committing the edits
         editor.commit();
@@ -108,10 +109,16 @@ public class MainActivity extends AppCompatActivity {
         //adapter.deleteButton(rv, 2);
     }
 
+    private void createFirstRow(){
+        list.add(new View(this));
+        list.add(new View(this));
+    }
+
     public void createNewCards(int ind1, int ind2){
-        list.add(ind1, new View(this));
-        list.add(ind2, new View(this));
-        //list.get(ind2).setVisibility(View.INVISIBLE);
+        if(ind1 > 1 || ind2 > 1){
+            list.add(ind1, new View(this));
+            list.add(ind2, new View(this));
+        }
     }
 
     /**
