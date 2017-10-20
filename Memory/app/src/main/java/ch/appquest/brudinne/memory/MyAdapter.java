@@ -104,7 +104,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         }
     }
 
-    public void deleteButton(ViewGroup parent, int position){
+    public void deleteButton(ViewGroup parent, int position, ){
         LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.match, parent, false);
         CardView card = (CardView) matchView.findViewById(R.id.cardView);
         ImageView image = (ImageView) matchView.findViewById(R.id.image);

@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -64,7 +65,13 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(FILE_NAME, 0);
         String memoryPairs = settings.getString("JSON", null);
         if(memoryPairs != null){
-            makeJsonArray(memoryPairs);
+            try {
+                pairValues = new JSONArray(memoryPairs);
+                setPictruesAndNames();
+            } catch(JSONException e){
+                //TODO Natalie: check errorhandling
+                e.printStackTrace();
+            }
         } else {
             Toast.makeText(this, "No saved pictures.", Toast.LENGTH_LONG).show();
         }
@@ -81,22 +88,23 @@ public class MainActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
         createFirstRow();
-
         createNewCards(2,3);
-                /*
+
+        /*
         adapter.createNewCards(0,1);
         adapter.createNewCards(2,3);
-         */
+        */
 
-//        Button button1 = (Button)findViewById(R.id.newCard);
-   /*     Button newButton = (Button)findViewById(R.id.newCard);
+        // Button button1 = (Button)findViewById(R.id.newCard);
+        /*
+        Button newButton = (Button)findViewById(R.id.newCard);
         newButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 takeQrCodePicture();
             }
-        });*/
+        });
+        */
     }
-
 
     @Override
     protected void onStop(){
@@ -182,23 +190,24 @@ public class MainActivity extends AppCompatActivity {
         */
     }
 
-    private void makeJsonArray(String jsonMemory){
+    private void setPictruesAndNames(){
         try {
-            pairValues = new JSONArray(jsonMemory);
             for(int i = 0; i < pairValues.length(); i++){
-                JSONObject pair = pairValues.getJSONObject(i);
-                JSONArray memoryPair = pair.getJSONArray("Pair");
-                for(int p = 0; i < memoryPair.length(); i++){
-                    JSONObject picture = memoryPair.getJSONObject(i);
-                    String description = picture.getString("name");
-                    PICTURE_PATH       = picture.getString("filepath");
-                    PICTURE_NAME    = picture.getString("filename");
-                    // TODO Natalie: implement insert from picture and description in app
-                    if(description != "null" && PICTURE_NAME != "null" && PICTURE_PATH != "null"){
-                        loadImageFromStorage();
-                    } else {
-                        // TODO Natalie: check that nothing is inserted where the empty picture should bee...
-                    }
+                JSONObject object = pairValues.getJSONObject(i);
+                String description = object.getString("name");
+                PICTURE_PATH       = object.getString("filepath");
+                PICTURE_NAME       = object.getString("filename");
+                // TODO Natalie: implement insert from picture and description in app
+                if(description != "null" && PICTURE_NAME != "null" && PICTURE_PATH != "null"){
+                    Bitmap picture = loadImageFromStorage();
+                    //TODO : insert in view
+                    adapter.deleteButton(new ViewGroup(this) {
+                        @Override
+                        protected void onLayout(boolean b, int i, int i1, int i2, int i3) {
+                        }
+                    }, i + 2);
+                } else {
+                    // TODO Natalie: check that nothing is inserted where the empty picture should bee...
                 }
             }
         } catch(JSONException e) {
@@ -268,20 +277,47 @@ public class MainActivity extends AppCompatActivity {
         //return tempFilePath;
     }
 
-    private void loadImageFromStorage()
+    private Bitmap loadImageFromStorage()
     {
+        Bitmap picture = null;
         try {
             File f = new File(PICTURE_PATH, PICTURE_NAME);
-            Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
+            picture = BitmapFactory.decodeStream(new FileInputStream(f));
+            /*
             ImageView img=(ImageView)findViewById(R.id.image);
-            img.setImageBitmap(b);
+            img.setImageBitmap(picture);
+            */
         }
         catch (FileNotFoundException e)
         {
             e.printStackTrace();
         }
-
+        return picture;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // log message handling
