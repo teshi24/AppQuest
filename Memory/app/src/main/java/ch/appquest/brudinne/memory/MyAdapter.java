@@ -1,6 +1,5 @@
 package ch.appquest.brudinne.memory;
 
-
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,8 +11,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class MyAdapter extends
-        RecyclerView.Adapter<MyAdapter.ViewHolder> {
+public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
@@ -41,16 +39,16 @@ public class MyAdapter extends
 
     private ArrayList<Card> thePictures;
     // Store the context for easy access
-    private Context theContext;
+    private MainActivity context;
 
     public MyAdapter(ArrayList<Card> pictures, Context context) {
-        theContext = context;
+        this.context = (MainActivity)context;
         thePictures = pictures;
     }
 
     // Easy access to the context object in the recyclerview
     private Context getContext() {
-        return theContext;
+        return context;
     }
 
     public void add(int position, Card item){
@@ -60,8 +58,7 @@ public class MyAdapter extends
 
     @Override
     public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
-        LayoutInflater inflater = LayoutInflater.from(context);
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         // Inflate the custom layout
         View contactView = inflater.inflate(R.layout.card_view, parent, false);
@@ -89,10 +86,10 @@ public class MyAdapter extends
         } else {
             textView.setVisibility(View.GONE);
             imageView.setVisibility(View.GONE);
+            context.buttonListener(photoButton);
+            context.buttonListener(backgroundButton);
         }
     }
-
-
 
     // Returns the total count of items in the list
     @Override

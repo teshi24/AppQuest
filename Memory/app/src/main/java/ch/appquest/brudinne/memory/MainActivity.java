@@ -8,14 +8,12 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -54,7 +52,14 @@ public class MainActivity extends AppCompatActivity {
 
     private int buttonIndex;
 
-    // TODO Natalie: change string to picture bitmap save variable
+    public int getButtonIndex() {
+        return buttonIndex;
+    }
+
+    public void setButtonIndex(int buttonIndex) {
+        this.buttonIndex = buttonIndex;
+    }
+// TODO Natalie: change string to picture bitmap save variable
     //private String PICTURE_NAME = "hello world!";
 
     /**
@@ -92,8 +97,6 @@ public class MainActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
         createFirstRow();
-
-        //createNewCards(2,3);
     }
 
     @Override
@@ -106,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
 
         settings = getSharedPreferences(FILE_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        // TODO: entcomment!
         editor.putString(STRING_NAME, json.toString());
 
         // Committing the edits
@@ -115,21 +117,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void onStart(){
         super.onStart();
-        //adapter.deleteButton(rv, 2);
     }
 
     private void createFirstRow(){
         list.add(new ButtonCard());
         list.add(new ButtonCard());
-        /*
-        View l0 = list.get(0);
-        View l1 = list.get(1);
-        overrideOnClick((Button) l0.findViewById(R.id.newCard));
-        overrideOnClick((Button) l0.findViewById(R.id.newCardPhoto));
-        overrideOnClick((Button) l1.findViewById(R.id.newCard));
-        overrideOnClick((Button) l1.findViewById(R.id.newCardPhoto));
-        */
-
     }
     /*
     private void overrideOnClick(Button button){
@@ -331,26 +323,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return picture;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
