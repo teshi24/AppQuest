@@ -72,12 +72,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onStart(){
-        adapter.deleteButton(rv, 2);
+        super.onStart();
+        //adapter.deleteButton(rv, 2);
     }
 
     public void createNewCards(int ind1, int ind2){
         list.add(ind1, new View(this));
         list.add(ind2, new View(this));
+        //list.get(ind2).setVisibility(View.INVISIBLE);
     }
 
     /**

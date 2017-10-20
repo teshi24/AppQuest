@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -48,10 +47,49 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                 button = (Button) matchView.findViewById(R.id.button);
             }
         }
+
+        public LinearLayout getMatchView() {
+            return matchView;
+        }
+
+        public void setMatchView(LinearLayout matchView) {
+            this.matchView = matchView;
+        }
+
+        public CardView getCard() {
+            return card;
+        }
+
+        public void setCard(CardView card) {
+            this.card = card;
+        }
+
+        public Button getButton() {
+            return button;
+        }
+
+        public void setButton(Button button) {
+            this.button = button;
+        }
+
+        public ImageView getImage() {
+            return image;
+        }
+
+        public void setImage(ImageView image) {
+            this.image = image;
+        }
+
+        public TextView getText() {
+            return text;
+        }
+
+        public void setText(TextView text) {
+            this.text = text;
+        }
     }
 
     public void deleteButton(ViewGroup parent, int position){
-
         LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.match, parent, false);
         CardView card = (CardView) matchView.findViewById(R.id.cardView);
         ImageView image = (ImageView) matchView.findViewById(R.id.image);
@@ -110,11 +148,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         // - replace the contents of the view with that element
         //View currentView = dataset2[position];
 
+        //((TextView)holder.matchView.findViewById(R.id.text)).setText("test");
+
         View currentView = dataset.get(position);
-
-        ((TextView)holder.matchView.findViewById(R.id.text)).setText("test");
-
-        Toast.makeText(activity, "here comes the bind view holder", Toast.LENGTH_LONG);
+        holder.text.setText(dataset.get(position).toString());
+        holder.button.setVisibility(currentView.getVisibility());
+        //.setText(currentView.getButton());
     }
 
     // Return the size of your dataset (invoked by the layout manager)
