@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.zxing.client.android.Intents;
@@ -132,6 +131,12 @@ public class MainActivity extends AppCompatActivity {
                 createNewCards(listSize++, listSize++);
             }
         });
+    }
+
+    public void createNewCard(int ind){
+        if(ind > 1){
+            list.add(ind, new View(this));
+        }
     }
 
     public void createNewCards(int ind1, int ind2){
