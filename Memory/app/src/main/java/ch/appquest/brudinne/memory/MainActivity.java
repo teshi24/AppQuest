@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private String PICTURE_PATH; // path of saved picture (without name)
     private File PICTURE_FILE;   // picture file with standard app internal storage path and picture name
 
+    private int buttonIndex;
+
     // TODO Natalie: change string to picture bitmap save variable
     //private String PICTURE_NAME = "hello world!";
 
@@ -63,13 +65,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        list = new ArrayList<>();
+
         // Get saved instance of JSON-Array with Name-Pairs and their links of pictures
         settings = getSharedPreferences(FILE_NAME, 0);
         String memoryPairs = settings.getString("JSON", null);
         if(memoryPairs != null){
             try {
                 pairValues = new JSONArray(memoryPairs);
-                setPictruesAndNames();
+                setUpList();
             } catch(JSONException e){
                 //TODO Natalie: check errorhandling
                 e.printStackTrace();
@@ -84,13 +88,10 @@ public class MainActivity extends AppCompatActivity {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
         rv.setLayoutManager(gridLayoutManager);
 
-        list = new ArrayList<>();
-
         adapter = new MyAdapter(list, this);
         rv.setAdapter(adapter);
 
         createFirstRow();
-
 
         //createNewCards(2,3);
     }
@@ -101,10 +102,12 @@ public class MainActivity extends AppCompatActivity {
         // Saving JSON-Array before app gets hidden
         // We need an Editor object to make preference changes.
         // All objects are from android.context.Context
+        JSONArray json = listToJson();
+
         settings = getSharedPreferences(FILE_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         // TODO: entcomment!
-        editor.putString(STRING_NAME, pairValues.toString());
+        editor.putString(STRING_NAME, json.toString());
 
         // Committing the edits
         editor.commit();
@@ -128,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         */
 
     }
+    /*
     private void overrideOnClick(Button button){
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -135,6 +139,16 @@ public class MainActivity extends AppCompatActivity {
                 createNewCards(listSize++, listSize++);
             }
         });
+    }
+    */
+
+    public void buttonListener(final Button button){
+        button.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+            buttonIndex = list.indexOf(button.getParent());
+            takeQrCodePicture();
+        };
+    });
     }
 
     public void createNewCards(int ind1, int ind2){
@@ -147,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * onklick newCard "take picture"
      */
-    public void takeQrCodePicture(View view) {
+    public void takeQrCodePicture() {
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setCaptureActivity(MyCaptureActivity.class);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
@@ -171,13 +185,13 @@ public class MainActivity extends AppCompatActivity {
             String path = extras.getString(
                     Intents.Scan.RESULT_BARCODE_IMAGE_PATH);
 
-            // Ein Bitmap zur Darstellung erhalten wir so:
-            // Bitmap bmp = BitmapFactory.decodeFile(path)
-
             String code = extras.getString(
                     Intents.Scan.RESULT);
             try {
-                savePicture(BitmapFactory.decodeFile(path), code /*, 1*/);
+                PictureCard newCard = savePicture(BitmapFactory.decodeFile(path), code);
+                if(newCard != null){
+                    addPhoto(newCard);
+                }
             } catch (IOException e) {
                 //TODO Natalie: check errorhandling
                 e.printStackTrace();
@@ -186,17 +200,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setMemoryPicture(Bitmap bmp, String word){
-        /*
-        ImageView imageView = new ImageView();
-        TextView textView   = new TextView();
-        CardView cardView   = new CardView();
-        cardView.addView(imageView);
-        cardView.addView(textView);
-        */
+    // Adds new row for pair or adds second value of pair in the same row and removes button in this row
+    private void addPhoto(PictureCard picture){
+        if(buttonIndex == 0 || buttonIndex == 1){
+            list.add(list.size(), picture);
+            list.add(list.size(), new ButtonCard());
+        } else {
+            if(buttonIndex % 2 == 1){
+                list.remove(buttonIndex);
+                list.add(buttonIndex, picture);
+            }
+        }
     }
 
-    private void setPictruesAndNames(){
+    private void setUpList(){
         Card c;
         try {
             for(int i = 0; i < pairValues.length(); i++){
@@ -208,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                 if(description != "null" && PICTURE_NAME != "null" && PICTURE_PATH != "null"){
                     Bitmap picture = loadImageFromStorage();
                     if(picture != null){
-                        c = new PictureCard(picture, description);
+                        c = new PictureCard(picture, description, PICTURE_PATH, PICTURE_NAME);
                     } else {
                         c  = new ButtonCard();
                     }
@@ -223,24 +240,36 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void savePicturesAndJson(){
-        try{
-            pairValues.toString();
-        } catch(Exception e){
-            //TODO Natalie: check errorhandling
-            e.printStackTrace();
+    private JSONArray listToJson(){
+        JSONArray json = new JSONArray();
+        for(Card item: list){
+            if(list.indexOf(item) > 1){
+                if(item instanceof PictureCard){
+                    JSONObject object = new JSONObject();
+                    try {
+                        object.put("name", ((PictureCard) item).getDescription());
+                        object.put("filepath", ((PictureCard) item).getFilepath());
+                        object.put("filename", ((PictureCard) item).getFilename());
+                        json.put(object);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
+        return json;
     }
 
 
-    private void savePicture(Bitmap picture, String word /*, int index*/) throws IOException {
+    private PictureCard savePicture(Bitmap picture, String word /*, int index*/) throws IOException {
         // Create Filename for picture
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        PICTURE_NAME = Environment.getExternalStorageDirectory() + "/" + word + "_" + timeStamp +".jpg";
+        PICTURE_NAME = word + "_" + timeStamp +".jpg";
 
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
         PICTURE_FILE = new File(directory, PICTURE_NAME);
+        PICTURE_PATH = directory.getAbsolutePath();
 
         FileOutputStream fos = null;
         try{
@@ -252,12 +281,14 @@ public class MainActivity extends AppCompatActivity {
         } finally {
             try {
                 fos.close();
+                return new PictureCard(picture, word, PICTURE_PATH, PICTURE_NAME);
             } catch (IOException e) {
                 //TODO Natalie: check errorhandling
                 e.printStackTrace();
+                return null;
             }
-            PICTURE_PATH = directory.getAbsolutePath();
         }
+
         /*File tempFile = new File(tempFilePath);
         if (!tempFile.exists()) {
             if (!tempFile.getParentFile().exists()) {

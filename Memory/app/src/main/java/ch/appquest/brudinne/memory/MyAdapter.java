@@ -92,6 +92,8 @@ public class MyAdapter extends
         }
     }
 
+
+
     // Returns the total count of items in the list
     @Override
     public int getItemCount() {
