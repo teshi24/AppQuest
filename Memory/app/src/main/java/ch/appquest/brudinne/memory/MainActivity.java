@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -81,20 +82,7 @@ public class MainActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
 
         createFirstRow();
-
-        createNewCards(2,3);
-                /*
-        adapter.createNewCards(0,1);
-        adapter.createNewCards(2,3);
-         */
-
-//        Button button1 = (Button)findViewById(R.id.newCard);
-   /*     Button newButton = (Button)findViewById(R.id.newCard);
-        newButton.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){
-                takeQrCodePicture();
-            }
-        });*/
+        //createNewCards(2,3);
     }
 
 
@@ -121,6 +109,21 @@ public class MainActivity extends AppCompatActivity {
     private void createFirstRow(){
         list.add(new View(this));
         list.add(new View(this));
+        View l0 = list.get(0);
+        View l1 = list.get(1);
+        overrideOnClick((Button) l0.findViewById(R.id.newCard));
+        overrideOnClick((Button) l0.findViewById(R.id.newCardPhoto));
+        overrideOnClick((Button) l1.findViewById(R.id.newCard));
+        overrideOnClick((Button) l1.findViewById(R.id.newCardPhoto));
+
+    }
+    private void overrideOnClick(Button button){
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                int listSize = list.size();
+                createNewCards(listSize++, listSize++);
+            }
+        });
     }
 
     public void createNewCards(int ind1, int ind2){

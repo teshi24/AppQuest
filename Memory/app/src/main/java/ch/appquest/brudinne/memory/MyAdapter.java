@@ -1,7 +1,6 @@
 package ch.appquest.brudinne.memory;
 
 import android.app.Activity;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -43,16 +42,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             super(matchView);
             this.matchView = matchView;
 
-            card = (CardView) matchView.findViewById(R.id.cardView);
 
             if(image != null) {
+                card = (CardView) matchView.findViewById(R.id.pictureView);
                 image = (ImageView) matchView.findViewById(R.id.image);
                 text = (TextView) matchView.findViewById(R.id.text);
             } else{
+                card = (CardView) matchView.findViewById(R.id.buttonView);
                 newCard = (Button) matchView.findViewById(R.id.newCard);
                 newCardPhoto = (Button) matchView.findViewById(R.id.newCardPhoto);
-                //newCardPhoto.bringToFront();
-                ViewCompat.setTranslationZ(newCardPhoto, 1);
             }
         }
 
@@ -106,7 +104,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     public void deleteButton(ViewGroup parent, int position){
         LinearLayout matchView = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.match, parent, false);
-        CardView card = (CardView) matchView.findViewById(R.id.cardView);
+        CardView card = (CardView) matchView.findViewById(R.id.pictureView);
         ImageView image = (ImageView) matchView.findViewById(R.id.image);
         TextView text = (TextView) matchView.findViewById(R.id.text);
 
