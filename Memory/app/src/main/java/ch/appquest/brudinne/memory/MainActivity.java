@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rv;
     private MyAdapter adapter;
-    private ArrayList<View> list;
+    private ArrayList<Card> list;
     //private String currentPhotoPath;
 
     private SharedPreferences settings;
@@ -116,14 +116,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createFirstRow(){
-        list.add(new View(this));
-        list.add(new View(this));
+        list.add(new ButtonCard());
+        list.add(new ButtonCard());
+        /*
         View l0 = list.get(0);
         View l1 = list.get(1);
         overrideOnClick((Button) l0.findViewById(R.id.newCard));
         overrideOnClick((Button) l0.findViewById(R.id.newCardPhoto));
         overrideOnClick((Button) l1.findViewById(R.id.newCard));
         overrideOnClick((Button) l1.findViewById(R.id.newCardPhoto));
+        */
 
     }
     private void overrideOnClick(Button button){
@@ -135,16 +137,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void createNewCard(int ind){
-        if(ind > 1){
-            list.add(ind, new View(this));
-        }
-    }
-
     public void createNewCards(int ind1, int ind2){
         if(ind1 > 1 || ind2 > 1){
-            list.add(ind1, new View(this));
-            list.add(ind2, new View(this));
+            list.add(ind1, new ButtonCard());
+            list.add(ind2, new ButtonCard());
         }
     }
 
@@ -201,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setPictruesAndNames(){
+        Card c;
         try {
             for(int i = 0; i < pairValues.length(); i++){
                 JSONObject object = pairValues.getJSONObject(i);
@@ -210,21 +207,20 @@ public class MainActivity extends AppCompatActivity {
                 // TODO Natalie: implement insert from picture and description in app
                 if(description != "null" && PICTURE_NAME != "null" && PICTURE_PATH != "null"){
                     Bitmap picture = loadImageFromStorage();
-                    //TODO : insert in view
-                    adapter.deleteButton(new ViewGroup(this) {
-                        @Override
-                        protected void onLayout(boolean b, int i, int i1, int i2, int i3) {
-                        }
-                    }, i + 2);
+                    if(picture != null){
+                        c = new PictureCard(picture, description);
+                    } else {
+                        c  = new ButtonCard();
+                    }
                 } else {
-                    // TODO Natalie: check that nothing is inserted where the empty picture should bee...
+                    c = new ButtonCard();
                 }
+                list.add(c);
             }
         } catch(JSONException e) {
             //TODO Natalie: check errorhandling
             e.printStackTrace();
         }
-
     }
 
     private void savePicturesAndJson(){
