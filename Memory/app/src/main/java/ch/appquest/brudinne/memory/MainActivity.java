@@ -115,9 +115,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * onklick button "take picture"
+     * onklick newCard "take picture"
      */
-    public void takeQrCodePicture() {
+    public void takeQrCodePicture(View view) {
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setCaptureActivity(MyCaptureActivity.class);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
     // --------------------
 
     /**
-     * prepare log button with QR-Code Intent
+     * prepare log newCard with QR-Code Intent
      * @param menu
      * @return
      */
