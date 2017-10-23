@@ -29,14 +29,16 @@
                 android:layout_height="match_parent"
                 android:background="@color/colorWhite"
                 android:layout_margin="@dimen/cardview_compat_inset_shadow"
-                android:layout_alignParentTop="true"/>
+                android:layout_alignParentTop="true"
+                android:onClick="buttonListener"/>
             <Button
                 android:id="@+id/newCardPhoto"
                 android:layout_width="75dp"
                 android:layout_height="50dp"
                 android:src="@drawable/photo"
                 android:background="@drawable/photo"
-                android:layout_centerInParent="true"/>
+                android:layout_centerInParent="true"
+                android:onClick="buttonListener"/>
             <ImageView
                 android:id="@+id/image"
                 android:layout_width="match_parent"
