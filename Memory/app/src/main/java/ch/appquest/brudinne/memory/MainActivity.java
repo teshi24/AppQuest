@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.google.zxing.client.android.Intents;
 import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -136,11 +137,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void buttonListener(final Button button){
         button.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){
-            buttonIndex = list.indexOf(button.getParent());
-            takeQrCodePicture();
-        };
-    });
+            public void onClick(View v) {
+                buttonIndex = list.indexOf(button.getParent());
+                takeQrCodePicture();
+            }
+        });
     }
 
     public void createNewCards(int ind1, int ind2){
@@ -154,46 +155,47 @@ public class MainActivity extends AppCompatActivity {
      * onklick newCard "take picture"
      */
     public void takeQrCodePicture() {
-        IntentIntegrator integrator = new IntentIntegrator(this);
+        IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
         integrator.setCaptureActivity(MyCaptureActivity.class);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        integrator.setPrompt("Scan QR-Code");
+        integrator.setBeepEnabled(false);
+        integrator.setCameraId(0);
+        integrator.setBarcodeImageEnabled(true);
         integrator.setOrientationLocked(false);
         integrator.addExtra(Intents.Scan.BARCODE_IMAGE_ENABLED, true);
         integrator.initiateScan();
     }
 
     /**
-     *
      * @param requestCode
      * @param resultCode
      * @param data
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == IntentIntegrator.REQUEST_CODE
-                && resultCode == RESULT_OK) {
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(scanResult != null){
+            if (requestCode == IntentIntegrator.REQUEST_CODE && resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras();
+                String path = extras.getString(Intents.Scan.RESULT_BARCODE_IMAGE_PATH);
 
-            Bundle extras = data.getExtras();
-            String path = extras.getString(
-                    Intents.Scan.RESULT_BARCODE_IMAGE_PATH);
-
-            String code = extras.getString(
-                    Intents.Scan.RESULT);
-            try {
-                PictureCard newCard = savePicture(BitmapFactory.decodeFile(path), code);
-                if(newCard != null){
-                    addPhoto(newCard);
+                String code = extras.getString(Intents.Scan.RESULT);
+                try {
+                    PictureCard newCard = savePicture(BitmapFactory.decodeFile(path), code);
+                    if(newCard != null) {
+                        addPhoto(newCard);
+                    }
+                } catch (IOException e) {
+                    //TODO Natalie: check errorhandling
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                //TODO Natalie: check errorhandling
-                e.printStackTrace();
             }
         }
-
     }
 
     // Adds new row for pair or adds second value of pair in the same row and removes button in this row
-    private void addPhoto(PictureCard picture){
+    private void addPhoto(PictureCard picture) {
         if(buttonIndex == 0 || buttonIndex == 1){
             list.add(list.size(), picture);
             list.add(list.size(), new ButtonCard());
@@ -317,8 +319,7 @@ public class MainActivity extends AppCompatActivity {
             img.setImageBitmap(picture);
             */
         }
-        catch (FileNotFoundException e)
-        {
+        catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         return picture;
