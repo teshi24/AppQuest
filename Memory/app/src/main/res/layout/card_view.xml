@@ -14,6 +14,7 @@
         android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_marginBottom="2dp"
         android:layout_weight="1"
         android:layout_gravity="left"
         android:gravity="left"
@@ -23,6 +24,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+<!--
             <Button
                 android:id="@+id/newCard"
                 android:layout_width="match_parent"
@@ -31,10 +33,13 @@
                 android:layout_margin="@dimen/cardview_compat_inset_shadow"
                 android:layout_alignParentTop="true"
                 android:onClick="buttonListener"/>
+-->
             <Button
                 android:id="@+id/newCardPhoto"
+                android:text="@string/index_of_card"
                 android:layout_width="75dp"
                 android:layout_height="50dp"
+                android:layout_margin="50dp"
                 android:src="@drawable/photo"
                 android:background="@drawable/photo"
                 android:layout_centerInParent="true"

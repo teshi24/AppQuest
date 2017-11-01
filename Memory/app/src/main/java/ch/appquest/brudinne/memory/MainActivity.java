@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences settings;
 
     private JSONArray pairValues;
-    public static  final String FILE_NAME = "MyJsonFile";
+    public static final String FILE_NAME = "MyJsonFile";
     public static final String STRING_NAME = "JSON";
 
     private String PICTURE_NAME; // name of picture file
@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * on create method
+     *
      * @param savedInstanceState
      */
     @Override
@@ -76,11 +77,11 @@ public class MainActivity extends AppCompatActivity {
         // Get saved instance of JSON-Array with Name-Pairs and their links of pictures
         settings = getSharedPreferences(FILE_NAME, 0);
         String memoryPairs = settings.getString("JSON", null);
-        if(memoryPairs != null){
+        if (memoryPairs != null) {
             try {
                 pairValues = new JSONArray(memoryPairs);
                 setUpList();
-            } catch(JSONException e){
+            } catch (JSONException e) {
                 //TODO Natalie: check errorhandling
                 e.printStackTrace();
             }
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
-        rv = (RecyclerView)findViewById(R.id.recyclerView);
+        rv = (RecyclerView) findViewById(R.id.recyclerView);
         //adapter = new CustomAdapter(getApplicationContext(),ApplicationState.getGridElements());
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
         rv.setLayoutManager(gridLayoutManager);
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
         // Saving JSON-Array before app gets hidden
         // We need an Editor object to make preference changes.
@@ -116,36 +117,36 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
-    public void onStart(){
+    public void onStart() {
         super.onStart();
     }
 
-    private void createFirstRow(){
+    private void createFirstRow() {
         list.add(new ButtonCard());
         list.add(new ButtonCard());
     }
-    /*
-    private void overrideOnClick(Button button){
+
+    public void buttonListener(final Button button) {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                int listSize = list.size();
-                createNewCards(listSize++, listSize++);
+                String s = ((Button) v).getText().toString();
+                try {
+                    buttonIndex = Integer.parseInt(s);
+                    if (buttonIndex < 2) {
+                        int listSize = list.size();
+                        createNewCards(listSize, 1+listSize);
+                        buttonIndex = listSize;
+                    }
+                    takeQrCodePicture();
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "no possible parse " + ((Button) v).getText().toString(), Toast.LENGTH_LONG);
+                }
             }
         });
     }
-    */
 
-    public void buttonListener(final Button button){
-        button.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v) {
-                buttonIndex = list.indexOf(button.getParent());
-                takeQrCodePicture();
-            }
-        });
-    }
-
-    public void createNewCards(int ind1, int ind2){
-        if(ind1 > 1 || ind2 > 1){
+    public void createNewCards(int ind1, int ind2) {
+        if (ind1 > 1 || ind2 > 1) {
             list.add(ind1, new ButtonCard());
             list.add(ind2, new ButtonCard());
         }
@@ -175,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if(scanResult != null){
+        if (scanResult != null) {
             if (requestCode == IntentIntegrator.REQUEST_CODE && resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras();
                 String path = extras.getString(Intents.Scan.RESULT_BARCODE_IMAGE_PATH);
@@ -183,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                 String code = extras.getString(Intents.Scan.RESULT);
                 try {
                     PictureCard newCard = savePicture(BitmapFactory.decodeFile(path), code);
-                    if(newCard != null) {
+                    if (newCard != null) {
                         addPhoto(newCard);
                     }
                 } catch (IOException e) {
@@ -196,49 +197,49 @@ public class MainActivity extends AppCompatActivity {
 
     // Adds new row for pair or adds second value of pair in the same row and removes button in this row
     private void addPhoto(PictureCard picture) {
-        if(buttonIndex == 0 || buttonIndex == 1){
+        if (buttonIndex == 0 || buttonIndex == 1) {
             list.add(list.size(), picture);
             list.add(list.size(), new ButtonCard());
         } else {
-            if(buttonIndex % 2 == 1){
+            if (buttonIndex % 2 == 1) {
                 list.remove(buttonIndex);
                 list.add(buttonIndex, picture);
             }
         }
     }
 
-    private void setUpList(){
+    private void setUpList() {
         Card c;
         try {
-            for(int i = 0; i < pairValues.length(); i++){
+            for (int i = 0; i < pairValues.length(); i++) {
                 JSONObject object = pairValues.getJSONObject(i);
                 String description = object.getString("name");
-                PICTURE_PATH       = object.getString("filepath");
-                PICTURE_NAME       = object.getString("filename");
+                PICTURE_PATH = object.getString("filepath");
+                PICTURE_NAME = object.getString("filename");
                 // TODO Natalie: implement insert from picture and description in app
-                if(description != "null" && PICTURE_NAME != "null" && PICTURE_PATH != "null"){
+                if (description != "null" && PICTURE_NAME != "null" && PICTURE_PATH != "null") {
                     Bitmap picture = loadImageFromStorage();
-                    if(picture != null){
+                    if (picture != null) {
                         c = new PictureCard(picture, description, PICTURE_PATH, PICTURE_NAME);
                     } else {
-                        c  = new ButtonCard();
+                        c = new ButtonCard();
                     }
                 } else {
                     c = new ButtonCard();
                 }
                 list.add(c);
             }
-        } catch(JSONException e) {
+        } catch (JSONException e) {
             //TODO Natalie: check errorhandling
             e.printStackTrace();
         }
     }
 
-    private JSONArray listToJson(){
+    private JSONArray listToJson() {
         JSONArray json = new JSONArray();
-        for(Card item: list){
-            if(list.indexOf(item) > 1){
-                if(item instanceof PictureCard){
+        for (Card item : list) {
+            if (list.indexOf(item) > 1) {
+                if (item instanceof PictureCard) {
                     JSONObject object = new JSONObject();
                     try {
                         object.put("name", ((PictureCard) item).getDescription());
@@ -258,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
     private PictureCard savePicture(Bitmap picture, String word /*, int index*/) throws IOException {
         // Create Filename for picture
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        PICTURE_NAME = word + "_" + timeStamp +".jpg";
+        PICTURE_NAME = word + "_" + timeStamp + ".jpg";
 
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
         File directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
@@ -266,10 +267,10 @@ public class MainActivity extends AppCompatActivity {
         PICTURE_PATH = directory.getAbsolutePath();
 
         FileOutputStream fos = null;
-        try{
+        try {
             fos = new FileOutputStream(PICTURE_FILE);
             picture.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-        } catch (Exception e){
+        } catch (Exception e) {
             //TODO Natalie: check errorhandling
             e.printStackTrace();
         } finally {
@@ -308,8 +309,7 @@ public class MainActivity extends AppCompatActivity {
         //return tempFilePath;
     }
 
-    private Bitmap loadImageFromStorage()
-    {
+    private Bitmap loadImageFromStorage() {
         Bitmap picture = null;
         try {
             File f = new File(PICTURE_PATH, PICTURE_NAME);
@@ -318,16 +318,11 @@ public class MainActivity extends AppCompatActivity {
             ImageView img=(ImageView)findViewById(R.id.image);
             img.setImageBitmap(picture);
             */
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         return picture;
     }
-
-
-
-
 
 
     // log message handling
@@ -335,6 +330,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * prepare log newCard with QR-Code Intent
+     *
      * @param menu
      * @return
      */
@@ -345,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
         menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if(pairValues != null){
+                if (pairValues != null) {
                     String resultArray = pairValues.toString();
                     log(resultArray);
                     return true;
@@ -360,13 +356,14 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * send log message to Logbook
+     *
      * @param resultArray
      */
     private void log(String resultArray) {
         Intent intent = new Intent("ch.appquest.intent.LOG");
         JSONObject log = new JSONObject();
 
-        if(checkInstalled(intent, "Logbook")) {
+        if (checkInstalled(intent, "Logbook")) {
             try {
                 log.put("task", "Memory");
                 log.put("solution", resultArray);
@@ -380,11 +377,12 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * checks, if an app is installed
+     *
      * @param intent
      * @param appName
      * @return
      */
-    private boolean checkInstalled(Intent intent, String appName){
+    private boolean checkInstalled(Intent intent, String appName) {
         if (getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
             Toast.makeText(this, appName + " App not Installed", Toast.LENGTH_LONG).show();
             return false;

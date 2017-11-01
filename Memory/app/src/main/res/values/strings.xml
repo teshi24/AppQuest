@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Memory</string>
+    <string name="index_of_card"></string>
 </resources>

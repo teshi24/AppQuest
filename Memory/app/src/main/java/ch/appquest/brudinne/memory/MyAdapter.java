@@ -33,7 +33,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             imageView        = (ImageView) itemView.findViewById(R.id.image);
             textView         = (TextView) itemView.findViewById(R.id.text);
             photoButton      = (Button) itemView.findViewById(R.id.newCardPhoto);
-            backgroundButton = (Button) itemView.findViewById(R.id.newCard);
+            // backgroundButton = (Button) itemView.findViewById(R.id.newCard);
         }
     }
 
@@ -75,19 +75,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         TextView textView = viewHolder.textView;
         ImageView imageView = viewHolder.imageView;
         Button photoButton = viewHolder.photoButton;
-        Button backgroundButton = viewHolder.backgroundButton;
+        //Button backgroundButton = viewHolder.backgroundButton;
 
         if(card instanceof PictureCard){
             // Set item views based on your views and data model
             textView.setText(((PictureCard) card).getDescription());
             imageView.setImageBitmap(((PictureCard) card).getPicture());
             photoButton.setVisibility(View.GONE);
-            backgroundButton.setVisibility(View.GONE);
+          //  backgroundButton.setVisibility(View.GONE);
         } else {
             textView.setVisibility(View.GONE);
             imageView.setVisibility(View.GONE);
+            photoButton.setText(""+position);
             context.buttonListener(photoButton);
-            context.buttonListener(backgroundButton);
+          //  context.buttonListener(backgroundButton);
         }
     }
 
