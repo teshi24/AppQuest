@@ -60,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
     public void setButtonIndex(int buttonIndex) {
         this.buttonIndex = buttonIndex;
     }
-// TODO Natalie: change string to picture bitmap save variable
-    //private String PICTURE_NAME = "hello world!";
 
     /**
      * on create method
@@ -198,8 +196,8 @@ public class MainActivity extends AppCompatActivity {
     // Adds new row for pair or adds second value of pair in the same row and removes button in this row
     private void addPhoto(PictureCard picture) {
         if (buttonIndex == 0 || buttonIndex == 1) {
-            list.add(list.size(), picture);
-            list.add(list.size(), new ButtonCard());
+            list.add(picture);
+            list.add(new ButtonCard());
         } else {
             if (buttonIndex % 2 == 1) {
                 list.remove(buttonIndex);
