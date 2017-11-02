@@ -81,6 +81,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             // Set item views based on your views and data model
             textView.setText(((PictureCard) card).getDescription());
             imageView.setImageBitmap(((PictureCard) card).getPicture());
+            imageView.setVisibility(View.VISIBLE);
             photoButton.setVisibility(View.GONE);
           //  backgroundButton.setVisibility(View.GONE);
         } else {
