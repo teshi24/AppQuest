@@ -34,9 +34,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+/**
+ * Todo: update view während laufzeit
+ * todo: JSON anpassen, welcher gesendet wird (überprüfung nicht vergessen!!)
+ */
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rv;
+    private GridLayoutManager gridLayoutManager;
     private MyAdapter adapter;
     private ArrayList<Card> list;
     //private String currentPhotoPath;
@@ -90,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         rv = (RecyclerView) findViewById(R.id.recyclerView);
         //adapter = new CustomAdapter(getApplicationContext(),ApplicationState.getGridElements());
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
+        gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
         rv.setLayoutManager(gridLayoutManager);
 
         adapter = new MyAdapter(list, this);
@@ -100,6 +105,13 @@ public class MainActivity extends AppCompatActivity {
             createFirstRow();
         }
     }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        adapter.notifyDataSetChanged();
+    }
+
 
     @Override
     protected void onPause() {
@@ -222,6 +234,10 @@ public class MainActivity extends AppCompatActivity {
                 list.add(buttonIndex, picture);
             //}
         }
+        //rv.setAdapter(adapter);
+        //rv.setLayoutManager(gridLayoutManager);
+        adapter.notifyDataSetChanged();
+        //recreate();
     }
 
     private void setUpList() {
@@ -233,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
                 PICTURE_PATH = object.getString("filepath");
                 PICTURE_NAME = object.getString("filename");
                 // TODO Natalie: implement insert from picture and description in app
-                if (description != "null" && PICTURE_NAME != "null" && PICTURE_PATH != "null") {
+                if (!description.equals("null") && !PICTURE_NAME.equals("null") && !PICTURE_PATH.equals("null")) {
                     Bitmap picture = loadImageFromStorage();
                     if (picture != null) {
                         c = new PictureCard(picture, description, PICTURE_PATH, PICTURE_NAME);
