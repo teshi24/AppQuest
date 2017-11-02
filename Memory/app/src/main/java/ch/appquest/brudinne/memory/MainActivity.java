@@ -96,9 +96,26 @@ public class MainActivity extends AppCompatActivity {
         adapter = new MyAdapter(list, this);
         rv.setAdapter(adapter);
 
-        createFirstRow();
+        if(list.isEmpty()){
+            createFirstRow();
+        }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Saving JSON-Array before app gets hidden
+        // We need an Editor object to make preference changes.
+        // All objects are from android.context.Context
+        JSONArray json = listToJson();
+
+        settings = getSharedPreferences(FILE_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(STRING_NAME, json.toString());
+
+        // Committing the edits
+        editor.commit();
+    }
     @Override
     protected void onStop() {
         super.onStop();
@@ -195,14 +212,15 @@ public class MainActivity extends AppCompatActivity {
 
     // Adds new row for pair or adds second value of pair in the same row and removes button in this row
     private void addPhoto(PictureCard picture) {
+        // evtl schmeissen das macht nichts hier
         if (buttonIndex == 0 || buttonIndex == 1) {
             list.add(picture);
             list.add(new ButtonCard());
         } else {
-            if (buttonIndex % 2 == 1) {
+            //if (buttonIndex % 2 == 1) {
                 list.remove(buttonIndex);
                 list.add(buttonIndex, picture);
-            }
+            //}
         }
     }
 
@@ -236,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
     private JSONArray listToJson() {
         JSONArray json = new JSONArray();
         for (Card item : list) {
-            if (list.indexOf(item) > 1) {
+            //if (list.indexOf(item) > 1) {
                 if (item instanceof PictureCard) {
                     JSONObject object = new JSONObject();
                     try {
@@ -247,8 +265,18 @@ public class MainActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                }else{
+                    JSONObject object = new JSONObject();
+                    try {
+                        object.put("name", "null");
+                        object.put("filepath", "null");
+                        object.put("filename", "null");
+                        json.put(object);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
+            //}
         }
         return json;
     }
