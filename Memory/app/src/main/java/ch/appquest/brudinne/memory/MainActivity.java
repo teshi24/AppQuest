@@ -1,3 +1,12 @@
+/**
+ * Date:            03.11.2017
+ * Version:         1.0
+ * Author:          Natalie Stalder, Nadja Stadelmann
+ * AppQuest:        Team:       Brudinne
+ *                  App 3:      Memory
+ * Version Test:    Handy:      APK 23
+ *                  Emulator:   APK 26
+ */
 package ch.appquest.brudinne.memory;
 
 import android.content.Context;
@@ -38,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
     private GridLayoutManager gridLayoutManager;
     private MyAdapter adapter;
     private ArrayList<Card> list;
-    //private String currentPhotoPath;
 
     private SharedPreferences settings;
 
@@ -49,16 +57,6 @@ public class MainActivity extends AppCompatActivity {
     private String PICTURE_NAME; // name of picture file
     private String PICTURE_PATH; // path of saved picture (without name)
     private File PICTURE_FILE;   // picture file with standard app internal storage path and picture name
-
-    private int buttonIndex;
-
-    public int getButtonIndex() {
-        return buttonIndex;
-    }
-
-    public void setButtonIndex(int buttonIndex) {
-        this.buttonIndex = buttonIndex;
-    }
 
     /**
      * on create method
