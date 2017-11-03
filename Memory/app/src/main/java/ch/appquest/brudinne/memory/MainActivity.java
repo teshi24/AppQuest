@@ -32,9 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-/**
- * Todo: Button 0/1 ohne result: keine reihe hinzufügen
- */
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rv;
@@ -220,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
             list.add(0,new ButtonCard());
             list.add(1,new ButtonCard());
         }
+        pairValues = listToJson();
         adapter.notifyDataSetChanged();
     }
 
@@ -335,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (pairValues != null) {
-                    log(pairValues);
+                    log();
                     return true;
                 }
                 Toast.makeText(MainActivity.this, "No results to log.", Toast.LENGTH_LONG).show();
@@ -347,10 +345,8 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * send log message to Logbook
-     *
-     * @param savedArray
      */
-    private void log(JSONArray savedArray) {
+    private void log() {
         Intent intent = new Intent("ch.appquest.intent.LOG");
         JSONObject log = new JSONObject();
 
@@ -358,11 +354,11 @@ public class MainActivity extends AppCompatActivity {
             try {
                 JSONArray resultArray = new JSONArray();
 
-                int size = savedArray.length();
+                int size = pairValues.length();
                 for(int i = 0; i < size; ++i){
-                    JSONObject oLeft = (JSONObject) savedArray.get(i);
+                    JSONObject oLeft = (JSONObject) pairValues.get(i);
                     String nameLeft = (String)oLeft.get("name");
-                    JSONObject oRight = (JSONObject) savedArray.get(++i);
+                    JSONObject oRight = (JSONObject) pairValues.get(++i);
                     String nameRight = (String)oRight.get("name");
 
                     if(!nameLeft.equals("null") && !nameRight.equals("null")){
