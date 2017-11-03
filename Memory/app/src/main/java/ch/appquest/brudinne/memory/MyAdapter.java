@@ -82,12 +82,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             textView.setText(((PictureCard) card).getDescription());
             imageView.setImageBitmap(((PictureCard) card).getPicture());
             imageView.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.VISIBLE);
             photoButton.setVisibility(View.GONE);
           //  backgroundButton.setVisibility(View.GONE);
         } else {
             textView.setVisibility(View.GONE);
             imageView.setVisibility(View.GONE);
             photoButton.setText(""+position);
+            photoButton.setVisibility(View.VISIBLE);
             context.buttonListener(photoButton);
           //  context.buttonListener(backgroundButton);
         }

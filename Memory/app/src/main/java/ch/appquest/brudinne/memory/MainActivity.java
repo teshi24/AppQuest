@@ -35,8 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Todo: update view während laufzeit
- * todo: JSON anpassen, welcher gesendet wird (überprüfung nicht vergessen!!)
+ * Todo: Button 0/1 ohne result: keine reihe hinzufügen
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -209,14 +208,17 @@ public class MainActivity extends AppCompatActivity {
                 String path = extras.getString(Intents.Scan.RESULT_BARCODE_IMAGE_PATH);
 
                 String code = extras.getString(Intents.Scan.RESULT);
-                try {
-                    PictureCard newCard = savePicture(BitmapFactory.decodeFile(path), code);
-                    if (newCard != null) {
-                        addPhoto(newCard);
+                if(code != null && !code.equals("")){
+                    try {
+                        PictureCard newCard = savePicture(BitmapFactory.decodeFile(path), code);
+                        if (newCard != null) {
+                            addPhoto(newCard);
+                        }
+                    } catch (IOException e) {
+                        Toast.makeText(this,"A problem occurred while saving the picture.", Toast.LENGTH_LONG);
                     }
-                } catch (IOException e) {
-                    //TODO Natalie: check errorhandling
-                    e.printStackTrace();
+                }else{
+                    Toast.makeText(this,"QR-Code cannot be encoded correctly", Toast.LENGTH_LONG);
                 }
             }
         }
@@ -270,33 +272,29 @@ public class MainActivity extends AppCompatActivity {
     private JSONArray listToJson() {
         JSONArray json = new JSONArray();
         for (Card item : list) {
-            //if (list.indexOf(item) > 1) {
-                if (item instanceof PictureCard) {
-                    JSONObject object = new JSONObject();
-                    try {
-                        object.put("name", ((PictureCard) item).getDescription());
-                        object.put("filepath", ((PictureCard) item).getFilepath());
-                        object.put("filename", ((PictureCard) item).getFilename());
-                        json.put(object);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }else{
-                    JSONObject object = new JSONObject();
-                    try {
-                        object.put("name", "null");
-                        object.put("filepath", "null");
-                        object.put("filename", "null");
-                        json.put(object);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+
+            JSONObject object = new JSONObject();
+            if (item instanceof PictureCard) {
+                try {
+                    object.put("name", ((PictureCard) item).getDescription());
+                    object.put("filepath", ((PictureCard) item).getFilepath());
+                    object.put("filename", ((PictureCard) item).getFilename());
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            //}
+            }else{
+                try {
+                    object.put("name", "null");
+                    object.put("filepath", "null");
+                    object.put("filename", "null");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            json.put(object);
         }
         return json;
     }
-
 
     private PictureCard savePicture(Bitmap picture, String word /*, int index*/) throws IOException {
         // Create Filename for picture
@@ -325,30 +323,6 @@ public class MainActivity extends AppCompatActivity {
                 return null;
             }
         }
-
-        /*File tempFile = new File(tempFilePath);
-        if (!tempFile.exists()) {
-            if (!tempFile.getParentFile().exists()) {
-                tempFile.getParentFile().mkdirs();
-            }
-        }
-
-        tempFile.delete();
-        tempFile.createNewFile();
-
-        int quality = 100;
-        FileOutputStream fileOutputStream = new FileOutputStream(tempFile);
-
-        BufferedOutputStream bos = new BufferedOutputStream(fileOutputStream);
-        picture.compress(Bitmap.CompressFormat.JPEG, quality, bos);
-
-        bos.flush();
-        bos.close();
-
-        picture.recycle();
-        */
-
-        //return tempFilePath;
     }
 
     private Bitmap loadImageFromStorage() {
@@ -356,10 +330,6 @@ public class MainActivity extends AppCompatActivity {
         try {
             File f = new File(PICTURE_PATH, PICTURE_NAME);
             picture = BitmapFactory.decodeStream(new FileInputStream(f));
-            /*
-            ImageView img=(ImageView)findViewById(R.id.image);
-            img.setImageBitmap(picture);
-            */
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -384,8 +354,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (pairValues != null) {
-                    String resultArray = pairValues.toString();
-                    log(resultArray);
+                    log(pairValues);
                     return true;
                 }
                 Toast.makeText(MainActivity.this, "No results to log.", Toast.LENGTH_LONG).show();
@@ -395,26 +364,46 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-
     /**
      * send log message to Logbook
      *
-     * @param resultArray
+     * @param savedArray
      */
-    private void log(String resultArray) {
+    private void log(JSONArray savedArray) {
         Intent intent = new Intent("ch.appquest.intent.LOG");
         JSONObject log = new JSONObject();
 
         if (checkInstalled(intent, "Logbook")) {
             try {
+                JSONArray resultArray = new JSONArray();
+
+                int size = savedArray.length();
+                for(int i = 0; i < size; ++i){
+                    JSONObject oLeft = (JSONObject) savedArray.get(i);
+                    String nameLeft = (String)oLeft.get("name");
+                    JSONObject oRight = (JSONObject) savedArray.get(++i);
+                    String nameRight = (String)oRight.get("name");
+
+                    if(!nameLeft.equals("null") && !nameRight.equals("null")){
+                        JSONArray pair = new JSONArray();
+                        pair.put(nameLeft);
+                        pair.put(nameRight);
+
+                        resultArray.put(pair);
+                    }
+                }
+
                 log.put("task", "Memory");
                 log.put("solution", resultArray);
             } catch (JSONException e) {
             }
-            intent.putExtra("ch.appquest.logmessage", log.toString());
-            startActivity(intent);
+            if(log != null && log.length() > 0){
+                intent.putExtra("ch.appquest.logmessage", log.toString());
+                startActivity(intent);
+            }else{
+                Toast.makeText(this, "No matches to log.", Toast.LENGTH_LONG);
+            }
         }
-
     }
 
     /**
