@@ -13,8 +13,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.zxing.client.android.Intents;
@@ -93,16 +91,13 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         rv = (RecyclerView) findViewById(R.id.recyclerView);
-        //adapter = new CustomAdapter(getApplicationContext(),ApplicationState.getGridElements());
-        gridLayoutManager = new GridLayoutManager(this /* the activity */, 2);
+        gridLayoutManager = new GridLayoutManager(this, 2);
         rv.setLayoutManager(gridLayoutManager);
 
         adapter = new MyAdapter(list, this);
         rv.setAdapter(adapter);
 
-        if(list.isEmpty()){
-            createFirstRow();
-        }
+        updateAndInsert();
     }
 
     @Override
@@ -152,25 +147,6 @@ public class MainActivity extends AppCompatActivity {
         list.add(new ButtonCard());
     }
 
-    public void buttonListener(final Button button) {
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String s = ((Button) v).getText().toString();
-                try {
-                    buttonIndex = Integer.parseInt(s);
-                    if (buttonIndex < 2) {
-                        int listSize = list.size();
-                        createNewCards(listSize, 1+listSize);
-                        buttonIndex = listSize;
-                    }
-                    takeQrCodePicture();
-                } catch (Exception e) {
-                    Toast.makeText(MainActivity.this, "no possible parse " + ((Button) v).getText().toString(), Toast.LENGTH_LONG);
-                }
-            }
-        });
-    }
-
     public void createNewCards(int ind1, int ind2) {
         if (ind1 > 1 || ind2 > 1) {
             list.add(ind1, new ButtonCard());
@@ -181,7 +157,8 @@ public class MainActivity extends AppCompatActivity {
     /**
      * onklick newCard "take picture"
      */
-    public void takeQrCodePicture() {
+    public void takeQrCodePicture(Card card) {
+        this.card = card;
         IntentIntegrator integrator = new IntentIntegrator(MainActivity.this);
         integrator.setCaptureActivity(MyCaptureActivity.class);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
@@ -193,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
         integrator.addExtra(Intents.Scan.BARCODE_IMAGE_ENABLED, true);
         integrator.initiateScan();
     }
+    private Card card;
 
     /**
      * @param requestCode
@@ -212,7 +190,12 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         PictureCard newCard = savePicture(BitmapFactory.decodeFile(path), code);
                         if (newCard != null) {
-                            addPhoto(newCard);
+                            int index = list.indexOf(card);
+                            if(index % 2 == 1 && index == 1){
+                                index --;
+                            }
+                            list.set(index, newCard);
+                            updateAndInsert();
                         }
                     } catch (IOException e) {
                         Toast.makeText(this,"A problem occurred while saving the picture.", Toast.LENGTH_LONG);
@@ -225,21 +208,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Adds new row for pair or adds second value of pair in the same row and removes button in this row
-    private void addPhoto(PictureCard picture) {
-        // evtl schmeissen das macht nichts hier
-        if (buttonIndex == 0 || buttonIndex == 1) {
-            list.add(picture);
-            list.add(new ButtonCard());
-        } else {
-            //if (buttonIndex % 2 == 1) {
-                list.remove(buttonIndex);
-                list.add(buttonIndex, picture);
-            //}
+    private void updateAndInsert() {
+        boolean noEmptyPair = true;
+        int s = list.size();
+        for(int i = 0; i < s; i = i + 2){
+            if(list.get(i) instanceof ButtonCard && list.get(i + 1) instanceof ButtonCard){
+                noEmptyPair = false;
+            }
         }
-        //rv.setAdapter(adapter);
-        //rv.setLayoutManager(gridLayoutManager);
+        if(noEmptyPair) {
+            list.add(0,new ButtonCard());
+            list.add(1,new ButtonCard());
+        }
         adapter.notifyDataSetChanged();
-        //recreate();
     }
 
     private void setUpList() {

@@ -5,7 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,8 +19,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
         public ImageView imageView;
-        public Button photoButton;
-        public Button backgroundButton;
+        public ImageButton photoButton;
+        public ImageButton backgroundButton;
         public TextView textView;
 
         // We also create a constructor that accepts the entire item row
@@ -32,8 +32,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
             imageView        = (ImageView) itemView.findViewById(R.id.image);
             textView         = (TextView) itemView.findViewById(R.id.text);
-            photoButton      = (Button) itemView.findViewById(R.id.newCardPhoto);
-            // backgroundButton = (Button) itemView.findViewById(R.id.newCard);
+            photoButton      = (ImageButton) itemView.findViewById(R.id.newCardPhoto);
+            // backgroundButton = (ImageButton) itemView.findViewById(R.id.newCard);
         }
     }
 
@@ -71,11 +71,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(MyAdapter.ViewHolder viewHolder, int position) {
         // Get the data model based on position
-        Card card = thePictures.get(position);
+        final Card card = thePictures.get(position);
         TextView textView = viewHolder.textView;
         ImageView imageView = viewHolder.imageView;
-        Button photoButton = viewHolder.photoButton;
-        //Button backgroundButton = viewHolder.backgroundButton;
+        ImageButton photoButton = viewHolder.photoButton;
 
         if(card instanceof PictureCard){
             // Set item views based on your views and data model
@@ -84,14 +83,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             imageView.setVisibility(View.VISIBLE);
             textView.setVisibility(View.VISIBLE);
             photoButton.setVisibility(View.GONE);
-          //  backgroundButton.setVisibility(View.GONE);
         } else {
             textView.setVisibility(View.GONE);
             imageView.setVisibility(View.GONE);
-            photoButton.setText(""+position);
             photoButton.setVisibility(View.VISIBLE);
-            context.buttonListener(photoButton);
-          //  context.buttonListener(backgroundButton);
+            photoButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    context.takeQrCodePicture(card);
+                }
+            });
         }
     }
 
