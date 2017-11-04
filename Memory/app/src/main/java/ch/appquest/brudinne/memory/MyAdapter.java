@@ -11,81 +11,90 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+/**
+ * Adapter class to set up the RecyclerView
+ */
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
-    // Provide a direct reference to each of the views within a data item
-    // Used to cache the views within the item layout for fast access
+    /**
+     * internal class which holds the references to all views <br>
+     * and cache them within the layout for fast access
+     */
     public class ViewHolder extends RecyclerView.ViewHolder {
-        // Your holder should contain a member variable
-        // for any view that will be set as you render a row
-        public ImageView imageView;
-        public ImageButton photoButton;
-        public ImageButton backgroundButton;
-        public TextView textView;
+        // all views which are used for a Card
+        public ImageView    imageView;
+        public ImageButton  photoButton;
+        public TextView     textView;
 
-        // We also create a constructor that accepts the entire item row
-        // and does the view lookups to find each subview
+        /**
+         * the constructor is needed for the view lookups to find all subviews
+         *
+         * @param itemView this should be a Card
+         */
         public ViewHolder(View itemView) {
-            // Stores the itemView in a public final member variable that can be used
-            // to access the context from any ViewHolder instance.
             super(itemView);
-
-            imageView        = (ImageView) itemView.findViewById(R.id.image);
-            textView         = (TextView) itemView.findViewById(R.id.text);
-            photoButton      = (ImageButton) itemView.findViewById(R.id.newCardPhoto);
-            // backgroundButton = (ImageButton) itemView.findViewById(R.id.newCard);
+            // get relevant subviews
+            imageView   = itemView.findViewById(R.id.image);
+            textView    = itemView.findViewById(R.id.text);
+            photoButton = itemView.findViewById(R.id.newCardPhoto);
         }
     }
 
+    // stores a list of Cards and the MainActivity for easy access
     private ArrayList<Card> thePictures;
-    // Store the context for easy access
     private MainActivity context;
 
+    /**
+     * @param pictures
+     * @param context
+     */
     public MyAdapter(ArrayList<Card> pictures, Context context) {
-        this.context = (MainActivity)context;
-        thePictures = pictures;
+        this.context    = (MainActivity) context;
+        thePictures     = pictures;
     }
 
-    // Easy access to the context object in the recyclerview
-    private Context getContext() {
-        return context;
-    }
-
-    public void add(int position, Card item){
-        thePictures.add(position, item);
-        notifyItemInserted(position);
-    }
-
+    /**
+     * is called by any added Card to our list
+     *
+     * @param parent
+     * @param viewType
+     * @return
+     */
     @Override
     public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        // get the view of a Card
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
-        // Inflate the custom layout
-        View contactView = inflater.inflate(R.layout.card_view, parent, false);
-
-        // Return a new holder instance
+        View contactView        = inflater.inflate(R.layout.card_view, parent, false);
         return new ViewHolder(contactView);
     }
 
-    // Involves populating data into the item through holder
+    /**
+     * called at start and if MyAdapter gets notified to get the activity updated
+     *
+     * @param viewHolder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(MyAdapter.ViewHolder viewHolder, int position) {
-        // Get the data model based on position
-        final Card card = thePictures.get(position);
-        TextView textView = viewHolder.textView;
-        ImageView imageView = viewHolder.imageView;
+        // Get the data model based on its position
+        final Card card         = thePictures.get(position);
+        TextView textView       = viewHolder.textView;
+        ImageView imageView     = viewHolder.imageView;
         ImageButton photoButton = viewHolder.photoButton;
-
-        if(card instanceof PictureCard){
-            // Set item views based on your views and data model
+        // set visibilities and listener depending on the kind of instance
+        if (card instanceof PictureCard) {
+            // set picture and text
             textView.setText(((PictureCard) card).getDescription());
             imageView.setImageBitmap(((PictureCard) card).getPicture());
-            imageView.setVisibility(View.VISIBLE);
             textView.setVisibility(View.VISIBLE);
+            imageView.setVisibility(View.VISIBLE);
+            // "remove" button from view
             photoButton.setVisibility(View.GONE);
         } else {
+            // "remove" picture and text from view
             textView.setVisibility(View.GONE);
             imageView.setVisibility(View.GONE);
+            // enable button
             photoButton.setVisibility(View.VISIBLE);
             photoButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {

@@ -21,27 +21,28 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <ImageButton
                 android:id="@+id/newCardPhoto"
                 android:layout_width="175dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/photo"
                 android:scaleType="centerCrop"/>
+
             <ImageView
                 android:id="@+id/image"
                 android:layout_width="175dp"
                 android:layout_height="225dp"
                 android:scaleType="centerCrop"
                 android:layout_alignParentTop="true"/>
+
             <TextView
                 android:id="@+id/text"
                 android:layout_width="175dp"
                 android:layout_height="wrap_content"
                 android:text="Part of your life."
                 android:textAlignment="center"
-                android:layout_below="@id/image"
-                />
+                android:layout_below="@id/image"/>
         </RelativeLayout>
     </android.support.v7.widget.CardView>
-
 </LinearLayout>

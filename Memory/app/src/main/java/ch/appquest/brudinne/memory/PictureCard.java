@@ -2,6 +2,9 @@ package ch.appquest.brudinne.memory;
 
 import android.graphics.Bitmap;
 
+/**
+ * class stores PictureCards values
+ */
 public class PictureCard extends Card {
     private Bitmap picture;
     private String filepath;
