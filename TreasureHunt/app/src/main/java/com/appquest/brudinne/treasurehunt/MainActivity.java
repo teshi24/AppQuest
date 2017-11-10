@@ -1,8 +1,11 @@
 package com.appquest.brudinne.treasurehunt;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -19,17 +22,24 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+/* TODO: check errors
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
+*/
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 
 public class MainActivity extends AppCompatActivity {
     private MapView map;
     private IMapController controller;
     Drawable marker  = getResources().getDrawable(android.R.drawable.star_big_on);
-    ResourceProxy resourceProxy = new DefaultResourceProxyImpl(getApplicationContext());
+    //TODO: check error
+    //ResourceProxy resourceProxy = new DefaultResourceProxyImpl(getApplicationContext());
 
-    private JSONArray latLongList = new JSONArray();
+    // variables to save list in JSON
+    private SharedPreferences   settings;
+    private JSONArray           latLongList = new JSONArray();
+    public static final String  FILE_NAME   = "MyJsonFile";
+    public static final String  STRING_NAME = "JSON";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +56,19 @@ public class MainActivity extends AppCompatActivity {
         // default zoom buttons and ability to zoom with 2 fingers
         map.setMultiTouchControls(true);
         map.setBuiltInZoomControls(true);
+
+        //Get Json-String and build Json-Array
+        settings           = getSharedPreferences(FILE_NAME, 0);
+        String latLongText = settings.getString("JSON", null);
+        if (latLongText != null) {
+            try {
+                latLongList = new JSONArray(latLongText);
+            } catch (JSONException e) {
+                Toast.makeText(this, "Problem with saved values.", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "No saved locations yet.", Toast.LENGTH_LONG).show();
+        }
 
         controller = map.getController();
         controller.setZoom(18);
@@ -67,9 +90,27 @@ public class MainActivity extends AppCompatActivity {
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
     }
 
+    /**
+     * save our view on pause
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Saving JSON-Array before app gets hidden
+        // We need an Editor object to make preference changes.
+        // All objects are from android.context.Context
+        settings                        = getSharedPreferences(FILE_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(STRING_NAME, latLongList.toString());
+
+        // Committing the edits
+        editor.commit();
+    }
+
     public void addSignToMap(){
 
     }
+
 
     public void addToJsonArray(int latitude, int longitude){
         JSONObject object = new JSONObject();
@@ -81,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
 
     // log message handling
