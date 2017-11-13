@@ -20,6 +20,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -30,6 +34,10 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.OverlayItem;
+import org.osmdroid.views.overlay.infowindow.InfoWindow;
+
+import java.util.HashMap;
 /* TODO: check if needed
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
@@ -45,8 +53,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private String provider;
     private double latitude, longitude;
 
-    MyItemizedOverlay myItemizedOverlay = null;
-    Drawable marker;
+    private MyItemizedOverlay myItemizedOverlay = null;
+    private Drawable marker;
     //TODO: check error
     //ResourceProxy resourceProxy = new DefaultResourceProxyImpl(getApplicationContext());
 
@@ -70,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMaxZoomLevel(20);
         map.setMultiTouchControls(true);
+
         controller = map.getController();
         controller.setZoom(18);
 
@@ -231,10 +240,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         editor.commit();
     }
 
-    public void addSignToMap(){
-
+    public void addLocationToMap(){
+        //TODO get current values from gps
+        //myItemizedOverlay.addItem(new GeoPoint(), "Posten " + (myItemizedOverlay.size() + 1) , "Posten");
     }
 
+    public void deleteLocationFromMap(OverlayItem overlayItem){
+        myItemizedOverlay.deleteItem(overlayItem);
+    }
 
     public void addToJsonArray(int latitude, int longitude){
         JSONObject object = new JSONObject();
@@ -308,6 +321,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             return false;
         }
         return true;
+    }
+
+    private class MyInfoWindow extends InfoWindow{
+        public MyInfoWindow(int layoutResId, MapView mapView) {
+            super(layoutResId, mapView);
+        }
+        public void onClose() {
+        }
+
+        public void onOpen(Object arg0) {
+            LinearLayout layout = (LinearLayout) mView.findViewById(R.id.bubble_layout);
+            Button btnMoreInfo = (Button) mView.findViewById(R.id.bubble_moreinfo);
+            TextView txtTitle = (TextView) mView.findViewById(R.id.bubble_title);
+            TextView txtDescription = (TextView) mView.findViewById(R.id.bubble_description);
+            TextView txtSubdescription = (TextView) mView.findViewById(R.id.bubble_subdescription);
+
+            txtTitle.setText("Title of my marker");
+            txtDescription.setText("Click here to view details!");
+            txtSubdescription.setText("You can also edit the subdescription");
+            layout.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // Override Marker's onClick behaviour here
+                }
+            });
+        }
     }
 }
 
