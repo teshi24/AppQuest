@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private String provider;
     private int latitute, longitude;
 
-    Drawable marker  = getResources().getDrawable(android.R.drawable.star_big_on);
+    Drawable marker;
     //TODO: check error
     //ResourceProxy resourceProxy = new DefaultResourceProxyImpl(getApplicationContext());
 
@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Context ctx = getApplicationContext();
+        marker  = getResources().getDrawable(android.R.drawable.star_big_on);
         //important! set your user agent to prevent getting banned from the osm servers
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         setContentView(R.layout.activity_main);
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             //todo: error because of latitudes..
         }
 
-        map = (MapView)findViewById(R.id.map);
+        map = findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMaxZoomLevel(20);
 
