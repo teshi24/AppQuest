@@ -2,17 +2,17 @@ package com.appquest.brudinne.treasurehunt;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
-import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -27,11 +27,11 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+
 /* TODO: check errors
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
 */
-import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 
 public class MainActivity extends AppCompatActivity implements LocationListener{
     private MapView map;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private String provider;
     private int latitute, longitude;
 
-    Drawable marker  = getResources().getDrawable(android.R.drawable.star_big_on);
+    //Drawable marker  = getResources().getDrawable(android.R.drawable.star_big_on);
     //TODO: check error
     //ResourceProxy resourceProxy = new DefaultResourceProxyImpl(getApplicationContext());
 
@@ -60,11 +60,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         setContentView(R.layout.activity_main);
 
+
         if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             return  ;
         }
+
 
         locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -77,26 +80,34 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             startActivity(intent);
         }
 
-
-        Criteria criteria = new Criteria();
-        provider = locationManager.getBestProvider(criteria,false);
-        Location location = null;
-
-        location = locationManager.getLastKnownLocation(provider);
-
-        if(location != null){
-            onLocationChanged(location);
-        }else{
-            //todo: error because of latitudes..
-        }
-
         map = (MapView)findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMaxZoomLevel(20);
 
         // default zoom buttons and ability to zoom with 2 fingers
-        map.setMultiTouchControls(true);
         map.setBuiltInZoomControls(true);
+        map.setMultiTouchControls(true);
+
+        controller = map.getController();
+        controller.setZoom(18);
+
+        //todo: something like this:
+        // move map on default view point
+        // todo: this is paris, should be current position via GPS
+        startPoint = new GeoPoint(48.8583, 2.2944);
+        //startPoint = new GeoPoint(location);
+        controller.setCenter(startPoint);
+
+        Criteria criteria = new Criteria();
+        provider = locationManager.getBestProvider(criteria,false);
+
+
+        Location location = locationManager.getLastKnownLocation(provider);
+        if(location != null){
+            onLocationChanged(location);
+        }else{
+            //todo: error because of latitudes..
+        }
 
         //Get Json-String and build Json-Array
         settings           = getSharedPreferences(FILE_NAME, 0);
@@ -110,17 +121,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         } else {
             Toast.makeText(this, "No saved locations yet.", Toast.LENGTH_LONG).show();
         }
-
-        controller = map.getController();
-        controller.setZoom(18);
-
-        //todo: something like this:
-        // move map on default view point
-        // todo: this is paris, should be current position via GPS
-        startPoint = new GeoPoint(48.8583, 2.2944);
-        //startPoint = new GeoPoint(location);
-        controller.setCenter(startPoint);
-
     }
 
     @Override
@@ -132,7 +132,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         //Configuration.getInstance().save(this, prefs);
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-        //locationManager.requestLocationUpdates(provider,400,1,this);
+        if ( Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return  ;
+        }
+
+        locationManager.requestLocationUpdates(provider,400,1,this);
     }
 
     @Override
@@ -162,6 +168,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     @Override
     protected void onPause() {
         super.onPause();
+        locationManager.removeUpdates(this);
+
         // Saving JSON-Array before app gets hidden
         // We need an Editor object to make preference changes.
         // All objects are from android.context.Context
@@ -170,8 +178,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         editor.putString(STRING_NAME, latLongList.toString());
         // Committing the edits
         editor.commit();
-
-        locationManager.removeUpdates(this);
     }
 
     public void addSignToMap(){
