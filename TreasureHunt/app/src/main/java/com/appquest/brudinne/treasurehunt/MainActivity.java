@@ -1,6 +1,7 @@
 package com.appquest.brudinne.treasurehunt;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -15,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,7 +40,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private IMapController controller;
 
     private LocationManager locationManager;
-    GeoPoint startPoint;
+    private Location location;
+    private GeoPoint startPoint;
     private String provider;
     private double latitude, longitude;
 
@@ -62,22 +65,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         setContentView(R.layout.activity_main);
 
-        // check if user has given the permission
-        if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
-                // Todo: handle request better
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
-                return;
-        }
-
-        locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-        // check if enabled and if not send user to the GSP settings
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            // todo: change to dialog and do in background if possible (stichwort AlarmDialog)
-            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(intent);
-        }
-
         // init map
         map = findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
@@ -85,20 +72,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         map.setMultiTouchControls(true);
         controller = map.getController();
         controller.setZoom(18);
-
-        // init location
-        Criteria criteria = new Criteria();
-        provider = locationManager.getBestProvider(criteria,false);
-        locationManager.requestLocationUpdates(provider,400,1,this);
-        Location location = locationManager.getLastKnownLocation(provider);
-        if(location != null){
-            onLocationChanged(location);
-        }else{
-            startPoint = new GeoPoint(0.247353,0.683354);
-        }
-        // todo: das an einem guten ort machen, etweder nur startup oder beim klick auf einen Button
-        controller.setCenter(startPoint);
-
 
 
 
@@ -144,14 +117,73 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         if ( Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return  ;
+            // Todo: handle request better
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+            return;
         }
 
+        locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
+            alertDialog.setTitle("Enable Location");
+            alertDialog.setMessage("Your locations setting is not enabled. Please enabled it in settings menu.");
+            alertDialog.setPositiveButton("Location Settings", new DialogInterface.OnClickListener(){
+                public void onClick(DialogInterface dialog, int which){
+                    Intent intent=new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(intent);
+                }
+            });
+            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+                public void onClick(DialogInterface dialog, int which){
+                    dialog.cancel();
+                }
+            });
+            AlertDialog alert=alertDialog.create();
+            alert.show();
+        }
+        //if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))return;
+
+        Criteria criteria = new Criteria();
+        provider = locationManager.getBestProvider(criteria,false);
+
         locationManager.requestLocationUpdates(provider,400,1,this);
+        location = locationManager.getLastKnownLocation(provider);
+        if(location != null){
+            onLocationChanged(location);
+        }else{
+            //todo: improve
+            location = new Location(provider);
+            location.setLatitude(latitude);
+            location.setLongitude(longitude);
+            onLocationChanged(location);
+            //startPoint = new GeoPoint(latitude,longitude);
+        }
+        // todo: das an einem guten ort machen, entweder nur startup oder beim klick auf einen Button
+        controller.setCenter(startPoint);
+    }
+
+    // todo: check if saveinstances is needed
+    private String SAVE_LONGITUDE = "saveLongitude";
+    private String SAVE_LATITUDE = "saveLatitude";
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+        outState.putDouble(SAVE_LATITUDE, latitude);
+        outState.putDouble(SAVE_LONGITUDE, longitude);
+        super.onSaveInstanceState(outState);
+    }
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState){
+        super.onRestoreInstanceState(savedInstanceState);
+        latitude = savedInstanceState.getDouble(SAVE_LATITUDE);
+        longitude = savedInstanceState.getDouble(SAVE_LONGITUDE);
     }
 
     @Override
     public void onLocationChanged(Location location) {
+        boolean setCenter = false;
+        if(latitude == 0 && longitude == 0){
+            setCenter = true;
+        }
         longitude = location.getLongitude();
         latitude = location.getLatitude();
         if(startPoint != null){
@@ -159,6 +191,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         }else{
             startPoint = new GeoPoint(location);
         }
+        if(setCenter) {
+            // todo: in button!
+            controller.setCenter(startPoint);
+        }
+        Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
     }
 
     @Override
