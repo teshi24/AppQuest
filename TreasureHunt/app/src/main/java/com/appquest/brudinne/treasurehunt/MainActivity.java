@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private LocationManager locationManager;
     GeoPoint startPoint;
     private String provider;
-    private int latitute, longitude;
+    private double latitude, longitude;
 
     MyItemizedOverlay myItemizedOverlay = null;
     Drawable marker;
@@ -61,52 +62,43 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         setContentView(R.layout.activity_main);
 
+        // check if user has given the permission
         if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
-       //     ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-       //     return;
+                ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+                // Todo: handle request better
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+                return;
         }
 
         locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-        boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         // check if enabled and if not send user to the GSP settings
-        // Better solution would be to display a dialog and suggesting to
-        // go to the settings
-        if (!enabled) {
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             // todo: change to dialog and do in background if possible (stichwort AlarmDialog)
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivity(intent);
         }
 
-        map = (MapView)findViewById(R.id.map);
+        // init map
+        map = findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMaxZoomLevel(20);
-
-        // default zoom buttons and ability to zoom with 2 fingers
         map.setMultiTouchControls(true);
-        //map.setBuiltInZoomControls(true);
-
         controller = map.getController();
         controller.setZoom(18);
 
-        //todo: something like this:
-        // move map on default view point
-        // todo: this is paris, should be current position via GPS
-        startPoint = new GeoPoint(48.8583, 2.2944);
-        //startPoint = new GeoPoint(location);
-        controller.setCenter(startPoint);
-
+        // init location
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria,false);
-
-        Location location = null;
-        //location = locationManager.getLastKnownLocation(provider);
+        locationManager.requestLocationUpdates(provider,400,1,this);
+        Location location = locationManager.getLastKnownLocation(provider);
         if(location != null){
             onLocationChanged(location);
         }else{
-            //todo: error because of latitudes..
+            startPoint = new GeoPoint(0.247353,0.683354);
         }
+        // todo: das an einem guten ort machen, etweder nur startup oder beim klick auf einen Button
+        controller.setCenter(startPoint);
+
 
 
 
@@ -160,13 +152,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
     @Override
     public void onLocationChanged(Location location) {
-        startPoint.setLatitude(location.getLatitude());
-        startPoint.setLongitude(location.getLongitude());
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+        if(startPoint != null){
+            startPoint.setCoords(latitude,longitude);
+        }else{
+            startPoint = new GeoPoint(location);
+        }
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        //todo: iwas auto-generated method stub http://www.vogella.com/tutorials/AndroidLocationAPI/article.html
+
     }
 
     @Override
