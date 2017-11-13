@@ -34,9 +34,7 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.ItemizedOverlay;
-import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
@@ -57,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private GeoPoint startPoint;
     private String provider;
     private double latitude, longitude;
-    Location location;
 
     private MyItemizedOverlay myItemizedOverlay = null;
     private ItemizedOverlay<OverlayItem> myLocationOverlay;
@@ -72,8 +69,30 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     public static final String  FILE_NAME   = "MyJsonFile";
     public static final String  STRING_NAME = "JSON";
 
+    public static final int PERMISSIONS_REQUEST = 0;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length <= 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_HOME);
+                    startActivity(intent);
+                }
+                return;
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if ( Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Todo: handle request better
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
+        }
         super.onCreate(savedInstanceState);
         Context ctx = getApplicationContext();
 
@@ -149,8 +168,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Todo: handle request better
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
-            return;
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
         }
 
         locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
@@ -266,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         if ( Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
             // Todo: handle request better
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+            //ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
             return;
         }
         /*Marker newMarker = new Marker(map);
@@ -339,18 +357,32 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         JSONObject log  = new JSONObject();
         if (checkInstalled(intent, "Logbook")) {
             try {
-                if(latLongList != null && latLongList.length() > 0) {
+                // set up log JSONObject from saved array
+                JSONArray resultArray = new JSONArray();
+                int size = latLongList.length();
+                for (int i = 0; i < size; ++i) {
+                    /*
+                    todo: improve this!!
+                    log.put("lat", hierMarkerarray.get(i).getPosition().getLatitudeE6());
+                    log.put("lon", hierMarkerarray.get(i).getPosition().getLongitudeE6());
+                     */
+                    //oooder
+                    log.put("lat", ((JSONObject)latLongList.get(i)).getDouble("lat")*Math.pow(10,6));
+                    log.put("lon", ((JSONObject)latLongList.get(i)).getDouble("lon")*Math.pow(10,6));
+                }
+                if (resultArray != null && resultArray.length() > 0) {
                     log.put("task", "Schatzkarte");
-                    log.put("points", latLongList);
+                    log.put("points", resultArray);
                 } else {
                     Toast.makeText(this, "No matches to log.", Toast.LENGTH_LONG).show();
                     return;
                 }
             } catch (JSONException e) {
+                return;
             }
-            intent.putExtra("ch.appquest.logmessage", log.toString());
-            startActivity(intent);
         }
+        intent.putExtra("ch.appquest.logmessage", log.toString());
+        startActivity(intent);
     }
 
     /**
