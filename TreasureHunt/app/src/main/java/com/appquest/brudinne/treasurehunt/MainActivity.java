@@ -218,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     /**
      * send log message to Logbook
      */
+    //TODO save lat and len in factor 1'000'000
     private void log() {
         Intent intent   = new Intent("ch.appquest.intent.LOG");
         JSONObject log  = new JSONObject();
