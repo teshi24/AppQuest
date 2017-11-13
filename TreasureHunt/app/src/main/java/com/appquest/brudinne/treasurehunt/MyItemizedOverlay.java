@@ -2,7 +2,6 @@ package com.appquest.brudinne.treasurehunt;
 
 import java.util.ArrayList;
 
-//import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IMapView;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.ItemizedOverlay;
@@ -11,21 +10,16 @@ import org.osmdroid.views.overlay.OverlayItem;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 
-
 public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 
     private ArrayList<OverlayItem> overlayItemList = new ArrayList<OverlayItem>();
 
     public MyItemizedOverlay(Drawable pDefaultMarker) {
         super(pDefaultMarker);
+        // TODO Auto-generated constructor stub
     }
 
-  /*  public MyItemizedOverlay(Drawable pDefaultMarker, ResourceProxy pResourceProxy) {
-        super(pDefaultMarker, pResourceProxy);
-        // TODO Auto-generated constructor stub
-    }*/
-
-    public void addItem(GeoPoint p, String title, String snippet) {
+    public void addItem(GeoPoint p, String title, String snippet){
         OverlayItem newItem = new OverlayItem(title, snippet, p);
         overlayItemList.add(newItem);
         populate();
@@ -48,4 +42,5 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> {
         // TODO Auto-generated method stub
         return overlayItemList.size();
     }
+
 }
