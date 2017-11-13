@@ -27,7 +27,7 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-/* TODO: check errors
+/* TODO: check if needed
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
 */
@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private String provider;
     private int latitute, longitude;
 
+    MyItemizedOverlay myItemizedOverlay = null;
     Drawable marker;
     //TODO: check error
     //ResourceProxy resourceProxy = new DefaultResourceProxyImpl(getApplicationContext());
@@ -56,16 +57,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Context ctx = getApplicationContext();
-        marker  = getResources().getDrawable(android.R.drawable.star_big_on);
+
+        //New marker
+        marker  = getResources().getDrawable(R.drawable.location_icon);
+        int markerWidth = marker.getIntrinsicWidth();
+        int markerHeight = marker.getIntrinsicHeight();
+        marker.setBounds(0, markerHeight, markerWidth, 0);
+
+
         //important! set your user agent to prevent getting banned from the osm servers
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         setContentView(R.layout.activity_main);
 
-        if ( Build.VERSION.SDK_INT >= 23 &&
+        /*if ( Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return  ;
-        }
+        }*/
 
         locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         boolean enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -83,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         provider = locationManager.getBestProvider(criteria,false);
         Location location = null;
 
-        location = locationManager.getLastKnownLocation(provider);
+        //location = locationManager.getLastKnownLocation(provider);
 
         if(location != null){
             onLocationChanged(location);
@@ -97,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
         // default zoom buttons and ability to zoom with 2 fingers
         map.setMultiTouchControls(true);
-        map.setBuiltInZoomControls(true);
+        //map.setBuiltInZoomControls(true);
 
         //Get Json-String and build Json-Array
         settings           = getSharedPreferences(FILE_NAME, 0);
@@ -121,6 +129,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         startPoint = new GeoPoint(48.8583, 2.2944);
         //startPoint = new GeoPoint(location);
         controller.setCenter(startPoint);
+
+        myItemizedOverlay = new MyItemizedOverlay(marker);
+        map.getOverlays().add(myItemizedOverlay);
+
+        GeoPoint myPoint1 = new GeoPoint(48.8583, 2.2944);
+        myItemizedOverlay.addItem(myPoint1, "myPoint1", "myPoint1");
+        GeoPoint myPoint2 = new GeoPoint(48.85, 2.1989);
+        myItemizedOverlay.addItem(myPoint2, "myPoint2", "myPoint2");
 
     }
 
