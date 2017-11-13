@@ -5,5 +5,4 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="white" >
-    ... rest of the file remains the same
 </LinearLayout>
