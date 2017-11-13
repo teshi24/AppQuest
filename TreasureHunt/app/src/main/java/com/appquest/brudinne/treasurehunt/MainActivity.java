@@ -35,6 +35,8 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.ItemizedOverlay;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
@@ -56,17 +58,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private String provider;
     private double latitude, longitude;
 
-    private MyItemizedOverlay myItemizedOverlay = null;
-    private ItemizedOverlay<OverlayItem> myLocationOverlay;
+    //private MyItemizedOverlay myItemizedOverlay = null;
     private Drawable drawable;
-    private ArrayList<OverlayItem> items = new ArrayList<>();
+    private ArrayList<Marker> items = new ArrayList<>();
+    Marker newMarker;
     //TODO: check error
     //ResourceProxy resourceProxy = new DefaultResourceProxyImpl(getApplicationContext());
 
     // variables to save list in JSON
     private SharedPreferences   settings;
     private JSONArray           latLongList = new JSONArray();
-    public static final String  FILE_NAME   = "MyJsonFile";
+    public static final String  FILE_NAME   = "MyLatLonFile";
     public static final String  STRING_NAME = "JSON";
 
     public static final int PERMISSIONS_REQUEST = 0;
@@ -103,36 +105,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         // init map
         map = findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
-        map.setMaxZoomLevel(20);
+        map.setMaxZoomLevel(30);
         map.setMultiTouchControls(true);
 
         controller = map.getController();
         controller.setZoom(18);
-
-        /* OnTapListener for the Markers, shows a simple Toast. */
-        /*
-        this.myLocationOverlay = new ItemizedIconOverlay<>(items,
-                new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
-                    @Override
-                    public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
-                        Toast.makeText(
-                                MainActivity.this,
-                                "Item '" + item.getTitle() + "' (index=" + index
-                                        + ") got single tapped up", Toast.LENGTH_LONG).show();
-                        return true; // We 'handled' this event.
-                    }
-
-                    @Override
-                    public boolean onItemLongPress(final int index, final OverlayItem item) {
-                        Toast.makeText(
-                                MainActivity.this,
-                                "Item '" + item.getTitle() + "' (index=" + index
-                                        + ") got long pressed", Toast.LENGTH_LONG).show();
-                        return false;
-                    }
-                }, getApplicationContext());
-        this.map.getOverlays().add(this.myLocationOverlay);
-        */
 
         //Get Json-String and build Json-Array
         settings           = getSharedPreferences(FILE_NAME, 0);
@@ -151,8 +128,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         drawable = getResources().getDrawable(R.drawable.location_icon);
         drawable.setBounds(0, drawable.getIntrinsicHeight(), drawable.getIntrinsicWidth(), 0);
 
+        /*
         myItemizedOverlay = new MyItemizedOverlay(drawable);
         map.getOverlays().add(myItemizedOverlay);
+        */
     }
 
     @Override
@@ -247,21 +226,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
-
     /**
      * save our view on pause
      */
@@ -287,30 +251,50 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             //ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
             return;
         }
-        /*Marker newMarker = new Marker(map);
+        newMarker = new Marker(map);
         newMarker.setPosition(new GeoPoint(location));
         newMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon));
-        newMarker.setTitle("Posten " + (map.getOverlays().size() + 1));
-        map.getOverlays().add(newMarker);
+        newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon_blue));
+        newMarker.setTitle("Posten " + (items.size() + 1));
+        newMarker.setDraggable(true);
         newMarker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
             @Override
-            public boolean onMarkerClick(Marker marker, MapView mapView) {
-                map.getOverlays().remove(marker);
-                return false;
+            public boolean onMarkerClick(final Marker marker, MapView mapView) {
+                //TODO: check if better / zuverlässigerer way exists
+                AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
+                alertDialog.setTitle("Delete Locatione");
+                alertDialog.setMessage("Do you want to delete this location marker?");
+                alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int which){
+                        items.remove(marker);
+                        map.getOverlays().remove(marker);
+                    }
+                });
+                alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int which){
+                        dialog.cancel();
+                    }
+                });
+                AlertDialog alert=alertDialog.create();
+                alert.show();
+                return true;
             }
-        });*/
-
-        //items.add(new OverlayItem("Posten " + (items.size() + 1) , "Posten", new GeoPoint(location)));
+        });
+        map.getOverlays().add(newMarker);
+        items.add(newMarker);
 
         //TODO get current values from gps
-        location = locationManager.getLastKnownLocation(provider);
-        myItemizedOverlay.addItem(new GeoPoint(location), "Posten " + (myItemizedOverlay.size() + 1) , "Posten");
+        //location = locationManager.getLastKnownLocation(provider);
+        //myItemizedOverlay.addItem(new GeoPoint(location), "Posten " + (myItemizedOverlay.size() + 1) , "Posten");
     }
 
-    public void deleteLocationFromMap(View view){
-        myItemizedOverlay.deleteItems();
+    public void gotoLocation(View view){
+        controller.setCenter(startPoint);
     }
+
+    /*public void deleteLocationFromMap(View view){
+        myItemizedOverlay.deleteItems();
+    }*/
 
     public void addToJsonArray(int latitude, int longitude){
         JSONObject object = new JSONObject();
@@ -400,29 +384,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         return true;
     }
 
-    private class MyInfoWindow extends InfoWindow{
-        public MyInfoWindow(int layoutResId, MapView mapView) {
-            super(layoutResId, mapView);
-        }
-        public void onClose() {
-        }
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
 
-        public void onOpen(Object arg0) {
-            LinearLayout layout = (LinearLayout) mView.findViewById(R.id.bubble_layout);
-            Button btnMoreInfo = (Button) mView.findViewById(R.id.bubble_moreinfo);
-            TextView txtTitle = (TextView) mView.findViewById(R.id.bubble_title);
-            TextView txtDescription = (TextView) mView.findViewById(R.id.bubble_description);
-            TextView txtSubdescription = (TextView) mView.findViewById(R.id.bubble_subdescription);
+    }
 
-            txtTitle.setText("Title of my drawable");
-            txtDescription.setText("Click here to view details!");
-            txtSubdescription.setText("You can also edit the subdescription");
-            layout.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    // Override Marker's onClick behaviour here
-                }
-            });
-        }
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 }
 

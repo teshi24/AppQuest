@@ -24,7 +24,7 @@
 
         <Button android:id="@+id/cancelButton" android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:layout_weight="1"
-            android:text="delete location"
-            android:onClick="deleteLocationFromMap"/>
+            android:text="goto location"
+            android:onClick="gotoLocation"/>
     </LinearLayout>
 </RelativeLayout>
