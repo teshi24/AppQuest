@@ -32,14 +32,19 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.ItemizedOverlay;
+import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.OverlayItem;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 /* TODO: check if needed
 import org.osmdroid.DefaultResourceProxyImpl;
 import org.osmdroid.ResourceProxy;
 */
+
+//TODO: if nothing todo : https://github.com/osmdroid/osmdroid/wiki/How-to-use-the-osmdroid-library#layout
 
 public class MainActivity extends AppCompatActivity implements LocationListener{
     private MapView map;
@@ -49,9 +54,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private GeoPoint startPoint;
     private String provider;
     private double latitude, longitude;
+    Location location;
 
     private MyItemizedOverlay myItemizedOverlay = null;
-    private Drawable marker;
+    private ItemizedOverlay<OverlayItem> myLocationOverlay;
+    private Drawable drawable;
+    private ArrayList<OverlayItem> items = new ArrayList<>();
     //TODO: check error
     //ResourceProxy resourceProxy = new DefaultResourceProxyImpl(getApplicationContext());
 
@@ -92,13 +100,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         map.setMaxZoomLevel(20);
         map.setMultiTouchControls(true);
 
-        map.setOnClickListener(new MapView. {
-            @Override
-            public void onClick(View map) {
-
-            }
-        });
-
         controller = map.getController();
         controller.setZoom(18);
 
@@ -106,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria,false);
         locationManager.requestLocationUpdates(provider,400,1,this);
-        Location location = locationManager.getLastKnownLocation(provider);
+        location = locationManager.getLastKnownLocation(provider);
         if(location != null){
             onLocationChanged(location);
         }else{
@@ -116,7 +117,30 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         controller.setCenter(startPoint);
 
 
+        /* OnTapListener for the Markers, shows a simple Toast. */
+        /*
+        this.myLocationOverlay = new ItemizedIconOverlay<>(items,
+                new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+                    @Override
+                    public boolean onItemSingleTapUp(final int index, final OverlayItem item) {
+                        Toast.makeText(
+                                MainActivity.this,
+                                "Item '" + item.getTitle() + "' (index=" + index
+                                        + ") got single tapped up", Toast.LENGTH_LONG).show();
+                        return true; // We 'handled' this event.
+                    }
 
+                    @Override
+                    public boolean onItemLongPress(final int index, final OverlayItem item) {
+                        Toast.makeText(
+                                MainActivity.this,
+                                "Item '" + item.getTitle() + "' (index=" + index
+                                        + ") got long pressed", Toast.LENGTH_LONG).show();
+                        return false;
+                    }
+                }, getApplicationContext());
+        this.map.getOverlays().add(this.myLocationOverlay);
+        */
 
         //Get Json-String and build Json-Array
         settings           = getSharedPreferences(FILE_NAME, 0);
@@ -131,15 +155,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             Toast.makeText(this, "No saved locations yet.", Toast.LENGTH_LONG).show();
         }
 
+        //New drawable
+        drawable = getResources().getDrawable(R.drawable.location_icon);
+        drawable.setBounds(0, drawable.getIntrinsicHeight(), drawable.getIntrinsicWidth(), 0);
 
-
-        //New marker
-        marker  = getResources().getDrawable(R.drawable.location_icon);
-        int markerWidth = marker.getIntrinsicWidth();
-        int markerHeight = marker.getIntrinsicHeight();
-        marker.setBounds(0, markerHeight, markerWidth, 0);
-
-        myItemizedOverlay = new MyItemizedOverlay(marker);
+        myItemizedOverlay = new MyItemizedOverlay(drawable);
         map.getOverlays().add(myItemizedOverlay);
 
         GeoPoint myPoint1 = new GeoPoint(48.8583, 2.2944);
@@ -210,13 +230,36 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         editor.commit();
     }
 
-    public void addLocationToMap(){
+    public void addLocationToMap(View view){
+        if ( Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+            // Todo: handle request better
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+            return;
+        }
+        /*Marker newMarker = new Marker(map);
+        newMarker.setPosition(new GeoPoint(location));
+        newMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon));
+        newMarker.setTitle("Posten " + (map.getOverlays().size() + 1));
+        map.getOverlays().add(newMarker);
+        newMarker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker, MapView mapView) {
+                map.getOverlays().remove(marker);
+                return false;
+            }
+        });*/
+
+        //items.add(new OverlayItem("Posten " + (items.size() + 1) , "Posten", new GeoPoint(location)));
+
         //TODO get current values from gps
-        //myItemizedOverlay.addItem(new GeoPoint(), "Posten " + (myItemizedOverlay.size() + 1) , "Posten");
+        location = locationManager.getLastKnownLocation(provider);
+        myItemizedOverlay.addItem(new GeoPoint(location), "Posten " + (myItemizedOverlay.size() + 1) , "Posten");
     }
 
-    public void deleteLocationFromMap(OverlayItem overlayItem){
-        myItemizedOverlay.deleteItem(overlayItem);
+    public void deleteLocationFromMap(View view){
+        myItemizedOverlay.deleteItems();
     }
 
     public void addToJsonArray(int latitude, int longitude){
@@ -307,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             TextView txtDescription = (TextView) mView.findViewById(R.id.bubble_description);
             TextView txtSubdescription = (TextView) mView.findViewById(R.id.bubble_subdescription);
 
-            txtTitle.setText("Title of my marker");
+            txtTitle.setText("Title of my drawable");
             txtDescription.setText("Click here to view details!");
             txtSubdescription.setText("You can also edit the subdescription");
             layout.setOnClickListener(new View.OnClickListener() {

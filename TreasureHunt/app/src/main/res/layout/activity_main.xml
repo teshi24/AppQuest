@@ -19,10 +19,12 @@
 
         <Button android:id="@+id/saveButton" android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:layout_weight="1"
-            android:text="plus" />
+            android:text="add location"
+            android:onClick="addLocationToMap"/>
 
         <Button android:id="@+id/cancelButton" android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:layout_weight="1"
-            android:text="minus" />
+            android:text="delete location"
+            android:onClick="deleteLocationFromMap"/>
     </LinearLayout>
 </RelativeLayout>
