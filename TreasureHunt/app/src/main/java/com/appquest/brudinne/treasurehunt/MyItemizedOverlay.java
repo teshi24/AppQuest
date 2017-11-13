@@ -15,7 +15,6 @@ import android.graphics.drawable.Drawable;
 public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> {
 
     private ArrayList<OverlayItem> overlayItemList = new ArrayList<OverlayItem>();
-    ArrayList<OverlayItem> items = new ArrayList<OverlayItem>();
 
     public MyItemizedOverlay(Drawable pDefaultMarker) {
         super(pDefaultMarker);
@@ -32,6 +31,13 @@ public class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> {
         overlayItemList.remove(overlayItem);
         populate();
 
+    }
+
+    public void deleteItems(){
+        for(OverlayItem item : overlayItemList){
+            overlayItemList.remove(item);
+        }
+        populate();
     }
 
     @Override
