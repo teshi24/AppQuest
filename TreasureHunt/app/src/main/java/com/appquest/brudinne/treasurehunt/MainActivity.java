@@ -213,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         if (setCenter) {
             controller.setCenter(startPoint);
         }
+        // todo: delete this before upload to manuel
         Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
     }
 
