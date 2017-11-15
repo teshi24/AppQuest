@@ -4,7 +4,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -35,8 +34,7 @@ import org.osmdroid.views.overlay.Marker;
 import java.util.ArrayList;
 
 //TODO: if nothing todo : https://github.com/osmdroid/osmdroid/wiki/How-to-use-the-osmdroid-library#layout
-
-public class MainActivity extends AppCompatActivity implements LocationListener{
+public class MainActivity extends AppCompatActivity implements LocationListener {
     private MapView map;
     private IMapController controller;
 
@@ -46,23 +44,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private String provider;
     private double latitude, longitude;
 
-    //private MyItemizedOverlay myItemizedOverlay = null;
-    private Drawable drawable;
     private ArrayList<Marker> items = new ArrayList<>();
     Marker newMarker;
 
     // variables to save list in JSON
-    private SharedPreferences   settings;
-    private JSONArray           latLongList = new JSONArray();
-    public static final String  FILE_NAME   = "MyLatLonFile";
-    public static final String  STRING_NAME = "JSON";
+    private SharedPreferences settings;
+    private JSONArray latLongList = new JSONArray();
+    public static final String FILE_NAME = "MyLatLonFile";
+    public static final String STRING_NAME = "JSON";
 
     public static final int PERMISSIONS_REQUEST = 0;
 
-    // todo: check if saveinstances is needed
-    private String SAVE_LONGITUDE = "saveLongitude";
-    private String SAVE_LATITUDE = "saveLatitude";
-
+    private boolean permissionChecked   = false;
+    private boolean permissionOK        = false;
+    private boolean permissionDenied    = false;
 
     // android lifecycle handling
     // --------------------------
@@ -74,8 +69,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
         setContentView(R.layout.activity_main);
 
-        checkPermission();
-
         // init map
         map = findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
@@ -86,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         controller.setZoom(18);
 
         getSavedJSONArray();
+
+        checkPermission();
+        permissionChecked = true;
     }
 
     /**
@@ -100,47 +96,76 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         //this will refresh the osmdroid configuration on resuming.
-        //if you make changes to the configuration, use
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        //Configuration.getInstance().save(this, prefs);
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-        checkPermission();
+        if(!permissionChecked){
+            checkPermission();
+        }else{
+            permissionOK = true;
+        }
 
-        locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-            AlertDialog.Builder alertDialog=new AlertDialog.Builder(this);
+        while(!permissionOK){// && !permissionDenied){ // todo: remove unnecessary asking for permission, remove closure of the app
+            try {
+                this.wait(Long.parseLong("1000"));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        /*
+        if(permissionChecked){
+            getLocation();
+        }else{
+           // Toast.makeText(this, "onResume Permission not available", Toast.LENGTH_LONG).show();
+            checkPermission();
+            //finishAffinity();
+        }
+        */
+ //       if(!permissionDenied){
+            getLocation();
+   //     }else{
+     //       finishAffinity();
+       // }
+    }
+
+    public void getLocation(){
+        locationManager =(LocationManager)
+
+        getSystemService(LOCATION_SERVICE);
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle("Enable Location");
             alertDialog.setMessage("Your locations setting is not enabled. Please enabled it in settings menu.");
-            alertDialog.setPositiveButton("Location Settings", new DialogInterface.OnClickListener(){
-                public void onClick(DialogInterface dialog, int which){
-                    Intent intent=new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            alertDialog.setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                     startActivity(intent);
                 }
             });
-            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
-                public void onClick(DialogInterface dialog, int which){
+            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
                     dialog.cancel();
                 }
             });
-            AlertDialog alert=alertDialog.create();
+            AlertDialog alert = alertDialog.create();
             alert.show();
         }
 
+        checkPermission("dummy");
+
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria,false);
+
         locationManager.requestLocationUpdates(provider,0,0,this);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,this);
 
-        // todo: das an einem guten ort machen, entweder nur startup oder beim klick auf einen Button
-        location = locationManager.getLastKnownLocation(provider);
-        if(location != null){
+        location =locationManager.getLastKnownLocation(provider);
+        if(location !=null) {
             onLocationChanged(location);
             controller.setCenter(startPoint);
-        }else{
+        }else {
             Toast.makeText(this, "Wait for GPS to come online.", Toast.LENGTH_LONG).show();
         }
     }
@@ -148,25 +173,33 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     // permission handling
     // -------------------
 
-    private void checkPermission(){
+    private boolean checkPermission(){
         if ( Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED) {
             // Todo: handle request better
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
+            return false;
         }
+        return true;
     }
+
+    private void checkPermission(String string){}
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case PERMISSIONS_REQUEST: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length <= 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length == 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                /*
                     Intent intent = new Intent(Intent.ACTION_MAIN);
                     intent.addCategory(Intent.CATEGORY_HOME);
                     startActivity(intent);
+                */
+                    permissionDenied = true;
+                    return;
                 }
-                return;
+                permissionOK = true;
             }
         }
     }
@@ -189,7 +222,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             startPoint = new GeoPoint(location);
         }
         if(setCenter) {
-            // todo: in button! already done but button isn't very nice
             controller.setCenter(startPoint);
         }
         Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
@@ -201,17 +233,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
     public void addLocationToMap(View view){
         addMarkerToList(location);
+        reloadMap();
     }
 
     public void addMarkerToList(Location location){
-        //// TODO: 15.11.2017 reload map!
-        checkPermission();
-        // todo: return!
+        if(!permissionChecked){
+            checkPermission();
+            // todo: return!
+        }
 
         newMarker = new Marker(map);
         newMarker.setPosition(new GeoPoint(location));
         newMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        //TODO: change icon
         newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon_blue_two));
         newMarker.setTitle("Posten " + (items.size() + 1));
         newMarker.setDraggable(true);
@@ -226,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                     public void onClick(DialogInterface dialog, int which){
                         items.remove(marker);
                         map.getOverlays().remove(marker);
+                        reloadMap();
                     }
                 });
                 alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
@@ -242,21 +276,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         items.add(newMarker);
     }
 
+    private void reloadMap(){
+        controller.setZoom(map.getZoomLevel()-1);
+        controller.setZoom(map.getZoomLevel()+1);
+    }
+
     // save 'n load handling
     // ---------------------
-
-    @Override
-    public void onSaveInstanceState(Bundle outState){
-        outState.putDouble(SAVE_LATITUDE, latitude);
-        outState.putDouble(SAVE_LONGITUDE, longitude);
-        super.onSaveInstanceState(outState);
-    }
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState){
-        super.onRestoreInstanceState(savedInstanceState);
-        latitude = savedInstanceState.getDouble(SAVE_LATITUDE);
-        longitude = savedInstanceState.getDouble(SAVE_LONGITUDE);
-    }
 
     public void saveJSONArray(){
         settings                        = getSharedPreferences(FILE_NAME, 0);
