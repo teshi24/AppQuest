@@ -32,6 +32,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.util.constants.MathConstants;
 
 import java.util.ArrayList;
 
@@ -104,18 +105,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         if (latLongText != null) {
             try {
                 latLongList = new JSONArray(latLongText);
+                addJsonObjectsToMarkerList();
             } catch (JSONException e) {
                 Toast.makeText(this, "Problem with saved values.", Toast.LENGTH_LONG).show();
             }
         } else {
             Toast.makeText(this, "No saved locations yet.", Toast.LENGTH_LONG).show();
         }
-
-        //New drawable
-        drawable = getResources().getDrawable(R.drawable.location_icon);
-        drawable.setBounds(0, drawable.getIntrinsicHeight(), drawable.getIntrinsicWidth(), 0);
-
-        //TODO: import all saved locations form json (method)
     }
 
     @Override
@@ -218,17 +214,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         super.onPause();
         locationManager.removeUpdates(this);
 
-        // Saving JSON-Array before app gets hidden
-        // We need an Editor object to make preference changes.
-        // All objects are from android.context.Context
         settings                        = getSharedPreferences(FILE_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
+        makeJsonArray();
         editor.putString(STRING_NAME, latLongList.toString());
         // Committing the edits
         editor.commit();
     }
 
-    public void addLocationToMap(View view){
+    public void addMarkerToList(Location location){
         if ( Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
             // Todo: handle request better
@@ -239,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         newMarker.setPosition(new GeoPoint(location));
         newMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         //TODO: change icon
-        newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon_blue));
+        newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon_blue_two));
         newMarker.setTitle("Posten " + (items.size() + 1));
         newMarker.setDraggable(true);
         newMarker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
@@ -247,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             public boolean onMarkerClick(final Marker marker, MapView mapView) {
                 //TODO: check if better / zuverlässigerer way exists
                 AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
-                alertDialog.setTitle("Delete Locatione");
+                alertDialog.setTitle("Delete Location");
                 alertDialog.setMessage("Do you want to delete this location marker?");
                 alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
                     public void onClick(DialogInterface dialog, int which){
@@ -267,31 +261,48 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         });
         map.getOverlays().add(newMarker);
         items.add(newMarker);
+    }
 
-        //location = locationManager.getLastKnownLocation(provider);
-        //myItemizedOverlay.addItem(new GeoPoint(location), "Posten " + (myItemizedOverlay.size() + 1) , "Posten");
+    public void addLocationToMap(View view){
+        addMarkerToList(location);
+    }
+
+    public void addJsonObjectsToMarkerList(){
+        for (int i = 0; i < latLongList.length(); ++i) {
+            try {
+                JSONObject object = (JSONObject) latLongList.get(i);
+                double lat        = object.getDouble("lat") / Math.pow(10,6);
+                double lon        = object.getDouble("lon") / Math.pow(10,6);
+                Location location = new Location("");
+                location.setLatitude(lat);
+                location.setLongitude(lon);
+                addMarkerToList(location);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void makeJsonArray(){
+        latLongList = new JSONArray();
+        for(Marker marker : items){
+            GeoPoint position = marker.getPosition();
+            Double lat        = position.getLatitude() * Math.pow(10,6);
+            Double lon        = position.getLongitude() * Math.pow(10,6);
+            JSONObject object = new JSONObject();
+            try {
+                object.put("lat", lat);
+                object.put("lon", lon);
+                latLongList.put(object);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void gotoLocation(View view){
         controller.setCenter(startPoint);
     }
-
-    /*public void deleteLocationFromMap(View view){
-        myItemizedOverlay.deleteItems();
-    }*/
-
-    public void addToJsonArray(int latitude, int longitude){
-        JSONObject object = new JSONObject();
-        try {
-            object.put("lat", Integer.toString(latitude));
-            object.put("lon", Integer.toString(longitude));
-            latLongList.put(object);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-
 
     // log message handling
     // --------------------
@@ -326,21 +337,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         if (checkInstalled(intent, "Logbook")) {
             try {
                 // set up log JSONObject from saved array
-                JSONArray resultArray = new JSONArray();
-                int size = latLongList.length();
-                for (int i = 0; i < size; ++i) {
-                    /*
-                    todo: improve this!!
-                    log.put("lat", hierMarkerarray.get(i).getPosition().getLatitudeE6());
-                    log.put("lon", hierMarkerarray.get(i).getPosition().getLongitudeE6());
-                     */
+                /*JSONArray resultArray = new JSONArray();
+                for (int i = 0; i < latLongList.length(); ++i) {
+
+                    //todo: improve this!!
+                    //log.put("lat", hierMarkerarray.get(i).getPosition().getLatitudeE6());
+                    //log.put("lon", hierMarkerarray.get(i).getPosition().getLongitudeE6());
+
                     //oooder
                     log.put("lat", ((JSONObject)latLongList.get(i)).getDouble("lat")*Math.pow(10,6));
                     log.put("lon", ((JSONObject)latLongList.get(i)).getDouble("lon")*Math.pow(10,6));
-                }
-                if (resultArray != null && resultArray.length() > 0) {
+                }*/
+                makeJsonArray();
+                if (latLongList != null && latLongList.length() > 0) {
                     log.put("task", "Schatzkarte");
-                    log.put("points", resultArray);
+                    log.put("points", latLongList);
                 } else {
                     Toast.makeText(this, "No matches to log.", Toast.LENGTH_LONG).show();
                     return;
