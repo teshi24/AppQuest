@@ -32,7 +32,6 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
-import org.osmdroid.views.util.constants.MathConstants;
 
 import java.util.ArrayList;
 
@@ -149,25 +148,20 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             AlertDialog alert=alertDialog.create();
             alert.show();
         }
-        //if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))return;
 
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria,false);
+        locationManager.requestLocationUpdates(provider,0,0,this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,this);
 
-        locationManager.requestLocationUpdates(provider,400,1,this);
+        // todo: das an einem guten ort machen, entweder nur startup oder beim klick auf einen Button
         location = locationManager.getLastKnownLocation(provider);
         if(location != null){
             onLocationChanged(location);
+            controller.setCenter(startPoint);
         }else{
-            //todo: improve
-            location = new Location(provider);
-            location.setLatitude(latitude);
-            location.setLongitude(longitude);
-            onLocationChanged(location);
-            //startPoint = new GeoPoint(latitude,longitude);
+            Toast.makeText(this, "Wait for GPS to come online.", Toast.LENGTH_LONG).show();
         }
-        // todo: das an einem guten ort machen, entweder nur startup oder beim klick auf einen Button
-        controller.setCenter(startPoint);
     }
 
     // todo: check if saveinstances is needed
@@ -189,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     @Override
     public void onLocationChanged(Location location) {
         boolean setCenter = false;
+        this.location = location;
         if(latitude == 0 && longitude == 0){
             setCenter = true;
         }
@@ -223,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     }
 
     public void addMarkerToList(Location location){
+        //// TODO: 15.11.2017 reload map! 
         if ( Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
             // Todo: handle request better
@@ -391,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
     @Override
     public void onProviderDisabled(String provider) {
-
+        // todo: add code for turn provider on!
     }
 }
 
