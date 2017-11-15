@@ -59,20 +59,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     public static final String  STRING_NAME = "JSON";
 
     public static final int PERMISSIONS_REQUEST = 0;
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length <= 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Intent intent = new Intent(Intent.ACTION_MAIN);
-                    intent.addCategory(Intent.CATEGORY_HOME);
-                    startActivity(intent);
-                }
-                return;
-            }
-        }
-    }
+
+    // todo: check if saveinstances is needed
+    private String SAVE_LONGITUDE = "saveLongitude";
+    private String SAVE_LATITUDE = "saveLatitude";
+
+    // android lifecycle handling
+    // --------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +104,22 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         } else {
             Toast.makeText(this, "No saved locations yet.", Toast.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     * save our view on pause
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(this);
+
+        settings                        = getSharedPreferences(FILE_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        makeJsonArray();
+        editor.putString(STRING_NAME, latLongList.toString());
+        // Committing the edits
+        editor.commit();
     }
 
     @Override
@@ -164,21 +173,26 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         }
     }
 
-    // todo: check if saveinstances is needed
-    private String SAVE_LONGITUDE = "saveLongitude";
-    private String SAVE_LATITUDE = "saveLatitude";
+    // permission handling
+    // -------------------
+
     @Override
-    public void onSaveInstanceState(Bundle outState){
-        outState.putDouble(SAVE_LATITUDE, latitude);
-        outState.putDouble(SAVE_LONGITUDE, longitude);
-        super.onSaveInstanceState(outState);
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length <= 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_HOME);
+                    startActivity(intent);
+                }
+                return;
+            }
+        }
     }
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState){
-        super.onRestoreInstanceState(savedInstanceState);
-        latitude = savedInstanceState.getDouble(SAVE_LATITUDE);
-        longitude = savedInstanceState.getDouble(SAVE_LONGITUDE);
-    }
+
+    // location handling
+    // -----------------
 
     @Override
     public void onLocationChanged(Location location) {
@@ -201,20 +215,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
     }
 
-    /**
-     * save our view on pause
-     */
-    @Override
-    protected void onPause() {
-        super.onPause();
-        locationManager.removeUpdates(this);
+    public void gotoLocation(View view){
+        controller.setCenter(startPoint);
+    }
 
-        settings                        = getSharedPreferences(FILE_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        makeJsonArray();
-        editor.putString(STRING_NAME, latLongList.toString());
-        // Committing the edits
-        editor.commit();
+    public void addLocationToMap(View view){
+        addMarkerToList(location);
     }
 
     public void addMarkerToList(Location location){
@@ -259,10 +265,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         items.add(newMarker);
     }
 
-    public void addLocationToMap(View view){
-        addMarkerToList(location);
-    }
-
     public void addJsonObjectsToMarkerList(){
         for (int i = 0; i < latLongList.length(); ++i) {
             try {
@@ -277,6 +279,23 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                 e.printStackTrace();
             }
         }
+    }
+
+
+    // save 'n load handling
+    // ---------------------
+
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+        outState.putDouble(SAVE_LATITUDE, latitude);
+        outState.putDouble(SAVE_LONGITUDE, longitude);
+        super.onSaveInstanceState(outState);
+    }
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState){
+        super.onRestoreInstanceState(savedInstanceState);
+        latitude = savedInstanceState.getDouble(SAVE_LATITUDE);
+        longitude = savedInstanceState.getDouble(SAVE_LONGITUDE);
     }
 
     public void makeJsonArray(){
@@ -294,10 +313,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                 e.printStackTrace();
             }
         }
-    }
-
-    public void gotoLocation(View view){
-        controller.setCenter(startPoint);
     }
 
     // log message handling
@@ -375,14 +390,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         return true;
     }
 
+    // unused needed methods
+    // ---------------------
+
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
+        // unused method
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-
+        // unused method
     }
 
     @Override
