@@ -21,9 +21,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -34,17 +31,9 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.ItemizedOverlay;
 import org.osmdroid.views.overlay.Marker;
-import org.osmdroid.views.overlay.Overlay;
-import org.osmdroid.views.overlay.OverlayItem;
-import org.osmdroid.views.overlay.infowindow.InfoWindow;
 
 import java.util.ArrayList;
-/* TODO: check if needed
-import org.osmdroid.DefaultResourceProxyImpl;
-import org.osmdroid.ResourceProxy;
-*/
 
 //TODO: if nothing todo : https://github.com/osmdroid/osmdroid/wiki/How-to-use-the-osmdroid-library#layout
 
@@ -62,8 +51,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private Drawable drawable;
     private ArrayList<Marker> items = new ArrayList<>();
     Marker newMarker;
-    //TODO: check error
-    //ResourceProxy resourceProxy = new DefaultResourceProxyImpl(getApplicationContext());
 
     // variables to save list in JSON
     private SharedPreferences   settings;
@@ -128,10 +115,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         drawable = getResources().getDrawable(R.drawable.location_icon);
         drawable.setBounds(0, drawable.getIntrinsicHeight(), drawable.getIntrinsicWidth(), 0);
 
-        /*
-        myItemizedOverlay = new MyItemizedOverlay(drawable);
-        map.getOverlays().add(myItemizedOverlay);
-        */
+        //TODO: import all saved locations form json (method)
     }
 
     @Override
@@ -220,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
             startPoint = new GeoPoint(location);
         }
         if(setCenter) {
-            // todo: in button!
+            // todo: in button! already done but button isn't very nice
             controller.setCenter(startPoint);
         }
         Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
@@ -254,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         newMarker = new Marker(map);
         newMarker.setPosition(new GeoPoint(location));
         newMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        //TODO: change icon
         newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon_blue));
         newMarker.setTitle("Posten " + (items.size() + 1));
         newMarker.setDraggable(true);
@@ -283,7 +268,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         map.getOverlays().add(newMarker);
         items.add(newMarker);
 
-        //TODO get current values from gps
         //location = locationManager.getLastKnownLocation(provider);
         //myItemizedOverlay.addItem(new GeoPoint(location), "Posten " + (myItemizedOverlay.size() + 1) , "Posten");
     }
