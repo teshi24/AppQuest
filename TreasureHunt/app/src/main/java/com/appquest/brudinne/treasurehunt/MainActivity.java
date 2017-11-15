@@ -55,9 +55,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     public static final int PERMISSIONS_REQUEST = 0;
 
-    private boolean permissionChecked   = false;
-    private boolean permissionOK        = false;
-    private boolean permissionDenied    = false;
+    private boolean permissionChecked = false;
+    private boolean permissionOK = false;
+    private boolean permissionDenied = false;
+
 
     // android lifecycle handling
     // --------------------------
@@ -101,19 +102,22 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         //this will refresh the osmdroid configuration on resuming.
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-        if(!permissionChecked){
+        if (!permissionChecked) {
             checkPermission();
-        }else{
+        } else {
             permissionOK = true;
         }
 
-        while(!permissionOK){// && !permissionDenied){ // todo: remove unnecessary asking for permission, remove closure of the app
+        while (!permissionOK) {// && !permissionDenied){ // todo: remove unnecessary asking for permission, remove closure of the app
             try {
                 this.wait(Long.parseLong("1000"));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+        getLocation();
+
         /*
         if(permissionChecked){
             getLocation();
@@ -122,60 +126,43 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             checkPermission();
             //finishAffinity();
         }
-        */
- //       if(!permissionDenied){
+
+        if(!permissionDenied){
             getLocation();
-   //     }else{
-     //       finishAffinity();
-       // }
+        }else{
+            finishAffinity();
+        }
+        */
     }
 
-    public void getLocation(){
-        locationManager =(LocationManager)
-
-        getSystemService(LOCATION_SERVICE);
-        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.setTitle("Enable Location");
-            alertDialog.setMessage("Your locations setting is not enabled. Please enabled it in settings menu.");
-            alertDialog.setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(intent);
-                }
-            });
-            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-            AlertDialog alert = alertDialog.create();
-            alert.show();
-        }
-
+    public void getLocation() {
         checkPermission("dummy");
 
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
         Criteria criteria = new Criteria();
-        provider = locationManager.getBestProvider(criteria,false);
+        provider = locationManager.getBestProvider(criteria, false);
 
-        locationManager.requestLocationUpdates(provider,0,0,this);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,this);
+        locationManager.requestLocationUpdates(provider, 0, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
 
-        location =locationManager.getLastKnownLocation(provider);
-        if(location !=null) {
+        location = locationManager.getLastKnownLocation(provider);
+        if (location != null) {
             onLocationChanged(location);
-            controller.setCenter(startPoint);
-        }else {
-            Toast.makeText(this, "Wait for GPS to come online.", Toast.LENGTH_LONG).show();
+            gotoLocation(new View(this));
+        } else {
+            controller.setZoom(18);
+            Toast.makeText(this, "Wait for GPS.", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     // permission handling
     // -------------------
 
-    private boolean checkPermission(){
-        if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED) {
+    private boolean checkPermission() {
+        if (Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Todo: handle request better
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
             return false;
@@ -183,7 +170,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return true;
     }
 
-    private void checkPermission(String string){}
+    private void checkPermission(String string) {
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -204,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
+
     // location handling
     // -----------------
 
@@ -211,33 +200,34 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onLocationChanged(Location location) {
         boolean setCenter = false;
         this.location = location;
-        if(latitude == 0 && longitude == 0){
+        if (latitude == 0 && longitude == 0) {
             setCenter = true;
         }
         longitude = location.getLongitude();
         latitude = location.getLatitude();
-        if(startPoint != null){
-            startPoint.setCoords(latitude,longitude);
-        }else{
+        if (startPoint != null) {
+            startPoint.setCoords(latitude, longitude);
+        } else {
             startPoint = new GeoPoint(location);
         }
-        if(setCenter) {
+        if (setCenter) {
             controller.setCenter(startPoint);
         }
         Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
     }
 
-    public void gotoLocation(View view){
+    public void gotoLocation(View view) {
         controller.setCenter(startPoint);
+        controller.setZoom(18);
     }
 
-    public void addLocationToMap(View view){
+    public void addLocationToMap(View view) {
         addMarkerToList(location);
         reloadMap();
     }
 
-    public void addMarkerToList(Location location){
-        if(!permissionChecked){
+    public void addMarkerToList(Location location) {
+        if (!permissionChecked) {
             checkPermission();
             // todo: return!
         }
@@ -245,29 +235,29 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         newMarker = new Marker(map);
         newMarker.setPosition(new GeoPoint(location));
         newMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-        newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon_blue_two));
+        newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon));
         newMarker.setTitle("Posten " + (items.size() + 1));
         newMarker.setDraggable(true);
         newMarker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(final Marker marker, MapView mapView) {
                 //TODO: check if better / zuverlässigerer way exists
-                AlertDialog.Builder alertDialog=new AlertDialog.Builder(MainActivity.this);
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
                 alertDialog.setTitle("Delete Location");
                 alertDialog.setMessage("Do you want to delete this location marker?");
-                alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
-                    public void onClick(DialogInterface dialog, int which){
+                alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
                         items.remove(marker);
                         map.getOverlays().remove(marker);
                         reloadMap();
                     }
                 });
-                alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
-                    public void onClick(DialogInterface dialog, int which){
+                alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
                     }
                 });
-                AlertDialog alert=alertDialog.create();
+                AlertDialog alert = alertDialog.create();
                 alert.show();
                 return true;
             }
@@ -276,16 +266,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         items.add(newMarker);
     }
 
-    private void reloadMap(){
-        controller.setZoom(map.getZoomLevel()-1);
-        controller.setZoom(map.getZoomLevel()+1);
+    private void reloadMap() {
+        controller.setZoom(map.getZoomLevel() - 1);
+        controller.setZoom(map.getZoomLevel() + 1);
     }
+
 
     // save 'n load handling
     // ---------------------
 
-    public void saveJSONArray(){
-        settings                        = getSharedPreferences(FILE_NAME, 0);
+    public void saveJSONArray() {
+        settings = getSharedPreferences(FILE_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         makeJSONArray();
         editor.putString(STRING_NAME, latLongList.toString());
@@ -293,12 +284,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         editor.commit();
     }
 
-    public void makeJSONArray(){
+    public void makeJSONArray() {
         latLongList = new JSONArray();
-        for(Marker marker : items){
+        for (Marker marker : items) {
             GeoPoint position = marker.getPosition();
-            Double lat        = position.getLatitude() * Math.pow(10,6);
-            Double lon        = position.getLongitude() * Math.pow(10,6);
+            Double lat = position.getLatitude() * Math.pow(10, 6);
+            Double lon = position.getLongitude() * Math.pow(10, 6);
             JSONObject object = new JSONObject();
             try {
                 object.put("lat", lat);
@@ -310,9 +301,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
-    public void getSavedJSONArray(){
+    public void getSavedJSONArray() {
         //Get Json-String and build Json-Array
-        settings           = getSharedPreferences(FILE_NAME, 0);
+        settings = getSharedPreferences(FILE_NAME, 0);
         String latLongText = settings.getString("JSON", null);
         if (latLongText != null) {
             try {
@@ -326,12 +317,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
-    public void addJSONObjectsToMarkerList(){
+    public void addJSONObjectsToMarkerList() {
         for (int i = 0; i < latLongList.length(); ++i) {
             try {
                 JSONObject object = (JSONObject) latLongList.get(i);
-                double lat        = object.getDouble("lat") / Math.pow(10,6);
-                double lon        = object.getDouble("lon") / Math.pow(10,6);
+                double lat = object.getDouble("lat") / Math.pow(10, 6);
+                double lon = object.getDouble("lon") / Math.pow(10, 6);
                 Location location = new Location("");
                 location.setLatitude(lat);
                 location.setLongitude(lon);
@@ -370,22 +361,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
      */
     //TODO save lat and len in factor 1'000'000
     private void log() {
-        Intent intent   = new Intent("ch.appquest.intent.LOG");
-        JSONObject log  = new JSONObject();
+        Intent intent = new Intent("ch.appquest.intent.LOG");
+        JSONObject log = new JSONObject();
         if (checkInstalled(intent, "Logbook")) {
             try {
-                // set up log JSONObject from saved array
-                /*JSONArray resultArray = new JSONArray();
-                for (int i = 0; i < latLongList.length(); ++i) {
-
-                    //todo: improve this!!
-                    //log.put("lat", hierMarkerarray.get(i).getPosition().getLatitudeE6());
-                    //log.put("lon", hierMarkerarray.get(i).getPosition().getLongitudeE6());
-
-                    //oooder
-                    log.put("lat", ((JSONObject)latLongList.get(i)).getDouble("lat")*Math.pow(10,6));
-                    log.put("lon", ((JSONObject)latLongList.get(i)).getDouble("lon")*Math.pow(10,6));
-                }*/
                 makeJSONArray();
                 if (latLongList != null && latLongList.length() > 0) {
                     log.put("task", "Schatzkarte");
@@ -428,12 +407,28 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onProviderEnabled(String provider) {
-        // unused method
+
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        // todo: add code for turn provider on!
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Enable Location");
+        alertDialog.setMessage("Your locations setting is not enabled. Please enabled it in settings menu.");
+        alertDialog.setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        });
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = alertDialog.create();
+        alert.show();
     }
-}
 
+    //todo: add wlan listener..
+}
