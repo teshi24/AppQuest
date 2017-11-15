@@ -1,6 +1,5 @@
 package com.appquest.brudinne.treasurehunt;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -64,23 +63,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     private String SAVE_LONGITUDE = "saveLongitude";
     private String SAVE_LATITUDE = "saveLatitude";
 
+
     // android lifecycle handling
     // --------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Todo: handle request better
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
-        }
         super.onCreate(savedInstanceState);
-        Context ctx = getApplicationContext();
-
         //important! set your user agent to prevent getting banned from the osm servers
-        Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+        Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
         setContentView(R.layout.activity_main);
+
+        checkPermission();
 
         // init map
         map = findViewById(R.id.map);
@@ -91,19 +85,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         controller = map.getController();
         controller.setZoom(18);
 
-        //Get Json-String and build Json-Array
-        settings           = getSharedPreferences(FILE_NAME, 0);
-        String latLongText = settings.getString("JSON", null);
-        if (latLongText != null) {
-            try {
-                latLongList = new JSONArray(latLongText);
-                addJsonObjectsToMarkerList();
-            } catch (JSONException e) {
-                Toast.makeText(this, "Problem with saved values.", Toast.LENGTH_LONG).show();
-            }
-        } else {
-            Toast.makeText(this, "No saved locations yet.", Toast.LENGTH_LONG).show();
-        }
+        getSavedJSONArray();
     }
 
     /**
@@ -114,12 +96,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         super.onPause();
         locationManager.removeUpdates(this);
 
-        settings                        = getSharedPreferences(FILE_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        makeJsonArray();
-        editor.putString(STRING_NAME, latLongList.toString());
-        // Committing the edits
-        editor.commit();
+        saveJSONArray();
     }
 
     @Override
@@ -131,12 +108,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         //Configuration.getInstance().save(this, prefs);
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-        if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Todo: handle request better
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
-        }
+        checkPermission();
 
         locationManager = (LocationManager)getSystemService(LOCATION_SERVICE);
         if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
@@ -175,6 +147,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
 
     // permission handling
     // -------------------
+
+    private void checkPermission(){
+        if ( Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED) {
+            // Todo: handle request better
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
+        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -224,13 +204,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
     }
 
     public void addMarkerToList(Location location){
-        //// TODO: 15.11.2017 reload map! 
-        if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission( this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
-            // Todo: handle request better
-            //ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
-            return;
-        }
+        //// TODO: 15.11.2017 reload map!
+        checkPermission();
+        // todo: return!
+
         newMarker = new Marker(map);
         newMarker.setPosition(new GeoPoint(location));
         newMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
@@ -265,23 +242,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         items.add(newMarker);
     }
 
-    public void addJsonObjectsToMarkerList(){
-        for (int i = 0; i < latLongList.length(); ++i) {
-            try {
-                JSONObject object = (JSONObject) latLongList.get(i);
-                double lat        = object.getDouble("lat") / Math.pow(10,6);
-                double lon        = object.getDouble("lon") / Math.pow(10,6);
-                Location location = new Location("");
-                location.setLatitude(lat);
-                location.setLongitude(lon);
-                addMarkerToList(location);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
     // save 'n load handling
     // ---------------------
 
@@ -298,7 +258,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         longitude = savedInstanceState.getDouble(SAVE_LONGITUDE);
     }
 
-    public void makeJsonArray(){
+    public void saveJSONArray(){
+        settings                        = getSharedPreferences(FILE_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        makeJSONArray();
+        editor.putString(STRING_NAME, latLongList.toString());
+        // Committing the edits
+        editor.commit();
+    }
+
+    public void makeJSONArray(){
         latLongList = new JSONArray();
         for(Marker marker : items){
             GeoPoint position = marker.getPosition();
@@ -309,6 +278,38 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                 object.put("lat", lat);
                 object.put("lon", lon);
                 latLongList.put(object);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void getSavedJSONArray(){
+        //Get Json-String and build Json-Array
+        settings           = getSharedPreferences(FILE_NAME, 0);
+        String latLongText = settings.getString("JSON", null);
+        if (latLongText != null) {
+            try {
+                latLongList = new JSONArray(latLongText);
+                addJSONObjectsToMarkerList();
+            } catch (JSONException e) {
+                Toast.makeText(this, "Problem with saved values.", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "No saved locations yet.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void addJSONObjectsToMarkerList(){
+        for (int i = 0; i < latLongList.length(); ++i) {
+            try {
+                JSONObject object = (JSONObject) latLongList.get(i);
+                double lat        = object.getDouble("lat") / Math.pow(10,6);
+                double lon        = object.getDouble("lon") / Math.pow(10,6);
+                Location location = new Location("");
+                location.setLatitude(lat);
+                location.setLongitude(lon);
+                addMarkerToList(location);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -359,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
                     log.put("lat", ((JSONObject)latLongList.get(i)).getDouble("lat")*Math.pow(10,6));
                     log.put("lon", ((JSONObject)latLongList.get(i)).getDouble("lon")*Math.pow(10,6));
                 }*/
-                makeJsonArray();
+                makeJSONArray();
                 if (latLongList != null && latLongList.length() > 0) {
                     log.put("task", "Schatzkarte");
                     log.put("points", latLongList);
@@ -389,6 +390,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener{
         }
         return true;
     }
+
 
     // unused needed methods
     // ---------------------
