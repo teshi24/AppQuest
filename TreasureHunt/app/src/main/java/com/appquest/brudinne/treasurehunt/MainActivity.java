@@ -1,5 +1,7 @@
 package com.appquest.brudinne.treasurehunt;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +10,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -360,7 +364,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     /**
      * send log message to Logbook
      */
-    //TODO save lat and len in factor 1'000'000
     private void log() {
         Intent intent = new Intent("ch.appquest.intent.LOG");
         JSONObject log = new JSONObject();
@@ -432,4 +435,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     //todo: add wlan listener..
+    //
+    public boolean checkInternetConnection(Context context){
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
+    }
+
 }
