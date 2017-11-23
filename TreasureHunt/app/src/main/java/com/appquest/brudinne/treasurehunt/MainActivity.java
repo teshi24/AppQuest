@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -18,7 +17,6 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,15 +35,9 @@ import org.osmdroid.views.overlay.Marker;
 import java.util.ArrayList;
 
 //TODO: if nothing todo : https://github.com/osmdroid/osmdroid/wiki/How-to-use-the-osmdroid-library#layout
-public class MainActivity extends AppCompatActivity implements LocationListener {
+public class MainActivity extends ConnectionListener {
     private MapView map;
     private IMapController controller;
-
-    private LocationManager locationManager;
-    private Location location;
-    private GeoPoint startPoint;
-    private String provider;
-    private double latitude, longitude;
 
     private ArrayList<Marker> items = new ArrayList<>();
     Marker newMarker;
@@ -74,7 +66,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         setContentView(R.layout.activity_main);
 
         // init map
-        map = findViewById(R.id.map);
+        // todo: (MapView) lassen, sonst kompiliert es nicht
+        map = (MapView)findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMaxZoomLevel(30);
         map.setMultiTouchControls(true);
@@ -88,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         permissionChecked = true;
 
         //todo: check if ok
-        checkInternetConnection(this);
+        //checkInternetConnection(this);
     }
 
     /**
@@ -229,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     public void gotoLocation(View view) {
         //todo: check if ok
-        checkInternetConnection(this);
+        //checkInternetConnection(this);
         if(startPoint != null) {
             controller.setCenter(startPoint);
             controller.setZoom(18);
@@ -240,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     public void addLocationToMap(View view) {
         //todo: check if ok
-        checkInternetConnection(this);
+        //checkInternetConnection(this);
         addMarkerToList(location);
         reloadMap();
     }
@@ -438,59 +431,74 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onProviderDisabled(String provider) {
         if(!dialogHasAlreadyOccured) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.setTitle("Enable Location");
-            alertDialog.setMessage("Your locations setting is not enabled. Please enabled it in settings menu.");
-            alertDialog.setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(intent);
-                }
-            });
-            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-            AlertDialog alert = alertDialog.create();
-            alert.show();
+            gpsSettingsDialog();
             dialogHasAlreadyOccured = true;
         }else{
             dialogHasAlreadyOccured = false;
         }
     }
 
-    public void noInternet(){
-        if(dialogWlanHasAlreadyOccured) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.setTitle("Enable Internet");
-            alertDialog.setMessage("You have no internet connection. Please enabled it in settings menu.");
-            alertDialog.setPositiveButton("Internet Settings", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                    startActivity(intent);
-                }
-            });
-            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-            AlertDialog alert = alertDialog.create();
-            alert.show();
-            dialogWlanHasAlreadyOccured = true;
-        }else{
-            dialogWlanHasAlreadyOccured = false;
+    public void gpsSettingsDialog(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Enable Location");
+        alertDialog.setMessage("Your locations setting is not enabled. Please enabled it in settings menu.");
+        alertDialog.setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        });
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = alertDialog.create();
+        alert.show();
+    }
+
+    public void noInternet(int enabled){
+        switch (enabled){
+            // internet disabled
+            case 0: internetSettingsDialog();
+                    break;
+            // no connection
+            case 1: internetConnectionInfo();
         }
     }
-    //todo: add wlan listener..
+
+    public void internetSettingsDialog(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Enable Internet");
+        alertDialog.setMessage("You have no internet connection. Please enabled it in settings menu.");
+        alertDialog.setPositiveButton("Internet Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                startActivity(intent);
+            }
+        });
+        // todo: add 3rd button for internet
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = alertDialog.create();
+        alert.show();
+    }
+
+    public void internetConnectionInfo(){
+        // todo: add information dialog no connection
+    }
+
     //wlan listener
     public void checkInternetConnection(Context context){
         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting()){
-            noInternet();
+        if (activeNetwork == null){
+            noInternet(0);
+        }else if(!activeNetwork.isConnectedOrConnecting()){
+            noInternet(1);
         }
     }
-
 }
