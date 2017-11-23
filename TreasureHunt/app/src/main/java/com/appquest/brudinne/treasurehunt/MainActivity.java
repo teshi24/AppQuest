@@ -1,6 +1,5 @@
 package com.appquest.brudinne.treasurehunt;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -434,6 +433,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     boolean dialogHasAlreadyOccured = false;
+    boolean dialogWlanHasAlreadyOccured = false;
 
     @Override
     public void onProviderDisabled(String provider) {
@@ -461,29 +461,34 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     public void noInternet(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("Enable Internet");
-        alertDialog.setMessage("You have no internet connection. Please enabled it in settings menu.");
-        alertDialog.setPositiveButton("Internet Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                startActivity(intent);
-            }
-        });
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        AlertDialog alert = alertDialog.create();
-        alert.show();
+        if(dialogWlanHasAlreadyOccured) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            alertDialog.setTitle("Enable Internet");
+            alertDialog.setMessage("You have no internet connection. Please enabled it in settings menu.");
+            alertDialog.setPositiveButton("Internet Settings", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                    startActivity(intent);
+                }
+            });
+            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            AlertDialog alert = alertDialog.create();
+            alert.show();
+            dialogWlanHasAlreadyOccured = true;
+        }else{
+            dialogWlanHasAlreadyOccured = false;
+        }
     }
     //todo: add wlan listener..
     //wlan listener
     public void checkInternetConnection(Context context){
         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()){
+        if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting()){
             noInternet();
         }
     }
