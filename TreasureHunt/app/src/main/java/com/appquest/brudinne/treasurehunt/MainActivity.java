@@ -87,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         checkPermission();
         permissionChecked = true;
+
+        //todo: check if ok
+        checkInternetConnection(this);
     }
 
     /**
@@ -122,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
         // todo: check internet - use method noInternet() for alert
+        //todo: check if ok
+        checkInternetConnection(this);
 
         getLocation();
 
@@ -224,6 +229,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     public void gotoLocation(View view) {
+        //todo: check if ok
+        checkInternetConnection(this);
         if(startPoint != null) {
             controller.setCenter(startPoint);
             controller.setZoom(18);
@@ -233,6 +240,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     public void addLocationToMap(View view) {
+        //todo: check if ok
+        checkInternetConnection(this);
         addMarkerToList(location);
         reloadMap();
     }
@@ -470,11 +479,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         alert.show();
     }
     //todo: add wlan listener..
-    //
-    public boolean checkInternetConnection(Context context){
+    //wlan listener
+    public void checkInternetConnection(Context context){
         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
+        if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()){
+            noInternet();
+        }
     }
 
 }
