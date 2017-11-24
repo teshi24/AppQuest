@@ -22,11 +22,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -103,47 +100,32 @@ public class MainActivity extends LocationHandler {
     @Override
     public void onResume() {
         super.onResume();
-        //this will refresh the osmdroid configuration on resuming.
-        Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
+            if(checkPermission(this)) {
+                //this will refresh the osmdroid configuration on resuming.
+                Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-     //   if (!permissionChecked) {
-            checkPermission();
-       // } else {
-         //   permissionOK = true;
-        //}
+                // todo: check internet - use method noInternet() for alert
+                //todo: check if ok
 
-/*
-        while (!permissionOK || !permissionDenied){
-            // todo: remove unnecessary asking for permission, remove closure of the app
-            try {
-                this.wait(Long.parseLong("10000"));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                //getLocation();
+
+                if (permissionChecked) {
+                    internetHandler.checkInternetConnection(this);
+                    getLocation(this);
+                } else {
+                    // Toast.makeText(this, "onResume Permission not available", Toast.LENGTH_LONG).show();
+                    //checkPermission();
+                    //finishAffinity();
+                }
+
+                if (!permissionDenied) {
+                    internetHandler.checkInternetConnection(this);
+                    getLocation(this);
+                } else {
+                    finishAffinity();
+                }
             }
-        }
-*/
-        // todo: check internet - use method noInternet() for alert
-        //todo: check if ok
-
-        //getLocation();
-
-        if(permissionChecked){
-            internetHandler.checkInternetConnection(this);
-            getLocation(this);
-        }else{
-           // Toast.makeText(this, "onResume Permission not available", Toast.LENGTH_LONG).show();
-            //checkPermission();
-            //finishAffinity();
-        }
-
-        if(!permissionDenied){
-            internetHandler.checkInternetConnection(this);
-            getLocation(this);
-        }else{
-            finishAffinity();
-        }
-
     }
 
     /**
@@ -166,6 +148,7 @@ public class MainActivity extends LocationHandler {
      * @return true if permission granted <br>
      *     false if permission denied
      */
+    /*
     @Override
     public boolean checkPermission() {
         if (Build.VERSION.SDK_INT >= 23 &&
@@ -175,6 +158,7 @@ public class MainActivity extends LocationHandler {
         }
         return true;
     }
+    */
 
     /**
      * evaluate result of permission request
@@ -185,18 +169,20 @@ public class MainActivity extends LocationHandler {
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
+
             case PERMISSIONS_REQUEST: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length == 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                /*
                     Intent intent = new Intent(Intent.ACTION_MAIN);
                     intent.addCategory(Intent.CATEGORY_HOME);
                     startActivity(intent);
-                */
+                /*
+
                     permissionDenied = true;
                     return;
+                */
                 }
-                permissionOK = true;
+                //permissionOK = true;
             }
         }
     }

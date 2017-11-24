@@ -1,14 +1,19 @@
 package com.appquest.brudinne.treasurehunt;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
@@ -30,9 +35,11 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
      * @param context
      */
     public void removeLocationUpdates(Context context){
-        // todo: remove this
-        if(locationManager != null)
-        locationManager.removeUpdates((LocationListener) context);
+        if(checkPermission(context)){
+            // todo: remove this
+            if(locationManager != null)
+            locationManager.removeUpdates((LocationListener) context);
+        }
     }
 
     /**
@@ -40,7 +47,7 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
      * @param context
      */
     public void getLocation(Context context) {
-        if(checkPermission()) {
+        if(checkPermission(context)) {
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
             Criteria criteria = new Criteria();
@@ -59,7 +66,8 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
      * @return true if permission granted <br>
      *     false if permission denied
      */
-    public abstract boolean checkPermission();
+
+    //public abstract boolean checkPermission();
 
     // unused needed methods
     // ---------------------
@@ -126,6 +134,9 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
         }
     }
 
+
+    public static final int PERMISSIONS_REQUEST = 0;
+
     /**
      * GPS dialog <br>
      * cancel or go to settings
@@ -147,5 +158,14 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
         });
         AlertDialog alert = alertDialog.create();
         alert.show();
+    }
+
+    public boolean checkPermission(Context context) {
+        if (Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions((Activity)context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
+            return false;
+        }
+        return true;
     }
 }
