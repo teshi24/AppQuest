@@ -141,12 +141,10 @@ public class MainActivity extends ConnectionListener {
             }
         }
 */
-        // todo: check internet - use method noInternet() for alert
-        //todo: check if ok
-
-        //getLocation();
 
         if(permissionChecked){
+            // todo: check internet - use method noInternet() for alert
+            //todo: check if ok
             checkInternetConnection(this);
             getLocation(this);
         }else{
