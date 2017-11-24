@@ -37,20 +37,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -68,16 +61,9 @@ import org.osmdroid.views.overlay.Marker;
 
 import java.util.ArrayList;
 
-//TODO: if nothing todo : https://github.com/osmdroid/osmdroid/wiki/How-to-use-the-osmdroid-library#layout
-public class MainActivity extends AppCompatActivity implements LocationListener {
+public class MainActivity extends ConnectionListener {
     private MapView map;
     private IMapController controller;
-
-    private LocationManager locationManager;
-    private Location location;
-    private GeoPoint startPoint;
-    private String provider;
-    private double latitude, longitude;
 
     private ArrayList<Marker> items = new ArrayList<>();
     Marker newMarker;
@@ -106,7 +92,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         setContentView(R.layout.activity_main);
 
         // init map
-        map = findViewById(R.id.map);
+        // todo: (MapView) lassen, sonst kompiliert es nicht
+        map = (MapView)findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMaxZoomLevel(30);
         map.setMultiTouchControls(true);
@@ -116,11 +103,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         getSavedJSONArray();
 
-        checkPermission();
-        permissionChecked = true;
-
-        //todo: check if ok
-        checkInternetConnection(this);
+        //checkPermission();
+        //permissionChecked = true;
     }
 
     /**
@@ -129,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     protected void onPause() {
         super.onPause();
-        locationManager.removeUpdates(this);
+        super.removeLocationUpdates(this);
 
         saveJSONArray();
     }
@@ -140,56 +124,49 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         //this will refresh the osmdroid configuration on resuming.
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-        if (!permissionChecked) {
-            checkPermission();
-        } else {
-            permissionOK = true;
-        }
 
-        while (!permissionOK) {// && !permissionDenied){
+     //   if (!permissionChecked) {
+            checkPermission();
+       // } else {
+         //   permissionOK = true;
+        //}
+
+/*
+        while (!permissionOK || !permissionDenied){
             // todo: remove unnecessary asking for permission, remove closure of the app
             try {
-                this.wait(Long.parseLong("1000"));
+                this.wait(Long.parseLong("10000"));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
+*/
         // todo: check internet - use method noInternet() for alert
         //todo: check if ok
-        checkInternetConnection(this);
 
-        getLocation();
+        //getLocation();
 
-        /*
         if(permissionChecked){
-            getLocation();
+            checkInternetConnection(this);
+            getLocation(this);
         }else{
            // Toast.makeText(this, "onResume Permission not available", Toast.LENGTH_LONG).show();
-            checkPermission();
+            //checkPermission();
             //finishAffinity();
         }
 
         if(!permissionDenied){
-            getLocation();
+            checkInternetConnection(this);
+            getLocation(this);
         }else{
             finishAffinity();
         }
-        */
+
     }
 
-    public void getLocation() {
-        checkPermission("dummy");
-
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        Criteria criteria = new Criteria();
-        provider = locationManager.getBestProvider(criteria, false);
-
-        locationManager.requestLocationUpdates(provider, 0, 0, this);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-
-        location = locationManager.getLastKnownLocation(provider);
+    @Override
+    public void getLocation(Context context) {
+        super.getLocation(this);
         if (location != null) {
             onLocationChanged(location);
             gotoLocation(new View(this));
@@ -199,20 +176,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
-
     // permission handling
     // -------------------
 
-    private boolean checkPermission() {
+    @Override
+    public boolean checkPermission() {
         if (Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
             return false;
         }
         return true;
-    }
-
-    private void checkPermission(String string) {
     }
 
     @Override
@@ -240,30 +214,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(Location location) {
-        boolean setCenter = false;
-        this.location = location;
-        if (latitude == 0 && longitude == 0) {
-            setCenter = true;
-        }
-        longitude = location.getLongitude();
-        latitude = location.getLatitude();
-        if (startPoint != null) {
-            startPoint.setCoords(latitude, longitude);
-        } else {
-            startPoint = new GeoPoint(location);
-        }
+        super.onLocationChanged(location);
         if (setCenter) {
-            controller.setCenter(startPoint);
+            controller.setCenter(geoPoint);
         }
-        // todo: delete this before upload to manuel
-        Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
     }
 
     public void gotoLocation(View view) {
         //todo: check if ok
-        checkInternetConnection(this);
-        if(startPoint != null) {
-            controller.setCenter(startPoint);
+        //checkInternetConnection(this);
+        if(geoPoint != null) {
+            controller.setCenter(geoPoint);
             controller.setZoom(18);
         }else{
             Toast.makeText(this, "Wait for GPS.", Toast.LENGTH_SHORT).show();
@@ -272,18 +233,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     public void addLocationToMap(View view) {
         //todo: check if ok
-        checkInternetConnection(this);
+        //checkInternetConnection(this);
         addMarkerToList(location);
         reloadMap();
     }
 
     public void addMarkerToList(Location location) {
-        /*
-        if (!permissionChecked) {
-            checkPermission();
-        }
-        */
-
         if(location != null) {
             newMarker = new Marker(map);
             newMarker.setPosition(new GeoPoint(location));
@@ -450,79 +405,4 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
         return true;
     }
-
-
-    // unused needed methods
-    // ---------------------
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        // unused method
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-    }
-
-    boolean dialogHasAlreadyOccured = false;
-    boolean dialogWlanHasAlreadyOccured = false;
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        if(!dialogHasAlreadyOccured) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.setTitle("Enable Location");
-            alertDialog.setMessage("Your locations setting is not enabled. Please enabled it in settings menu.");
-            alertDialog.setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(intent);
-                }
-            });
-            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-            AlertDialog alert = alertDialog.create();
-            alert.show();
-            dialogHasAlreadyOccured = true;
-        }else{
-            dialogHasAlreadyOccured = false;
-        }
-    }
-
-    public void noInternet(){
-        if(dialogWlanHasAlreadyOccured) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.setTitle("Enable Internet");
-            alertDialog.setMessage("You have no internet connection. Please enabled it in settings menu.");
-            alertDialog.setPositiveButton("Internet Settings", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                    startActivity(intent);
-                }
-            });
-            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-            AlertDialog alert = alertDialog.create();
-            alert.show();
-            dialogWlanHasAlreadyOccured = true;
-        }else{
-            dialogWlanHasAlreadyOccured = false;
-        }
-    }
-    //todo: add wlan listener..
-    //wlan listener
-    public void checkInternetConnection(Context context){
-        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting()){
-            noInternet();
-        }
-    }
-
 }
