@@ -7,8 +7,6 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
@@ -20,19 +18,27 @@ import org.osmdroid.util.GeoPoint;
 /**
  * Created by Nadja on 23.11.2017.
  */
-public abstract class ConnectionListener extends AppCompatActivity implements LocationListener {
+public abstract class LocationHandler extends AppCompatActivity implements LocationListener {
     protected LocationManager locationManager;
     protected Location location;
     protected GeoPoint geoPoint;
     protected String provider;
     protected double latitude, longitude;
 
+    /**
+     * remove updates from locationManager
+     * @param context
+     */
     public void removeLocationUpdates(Context context){
         // todo: remove this
         if(locationManager != null)
         locationManager.removeUpdates((LocationListener) context);
     }
 
+    /**
+     * get current Location
+     * @param context
+     */
     public void getLocation(Context context) {
         if(checkPermission()) {
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -47,6 +53,12 @@ public abstract class ConnectionListener extends AppCompatActivity implements Lo
         }
     }
 
+    /**
+     * implements check off all needed permissions <br>
+     * at least GPS permission must get granted
+     * @return true if permission granted <br>
+     *     false if permission denied
+     */
     public abstract boolean checkPermission();
 
     // unused needed methods
@@ -54,6 +66,10 @@ public abstract class ConnectionListener extends AppCompatActivity implements Lo
 
     protected boolean setCenter;
 
+    /**
+     * get new location information as soon as the location has changed
+     * @param location
+     */
     @Override
     public void onLocationChanged(Location location) {
         setCenter = false;
@@ -72,18 +88,35 @@ public abstract class ConnectionListener extends AppCompatActivity implements Lo
         Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * do something when GPS provider status has changed <br>
+     * not supported yet
+     * @param provider
+     * @param status
+     * @param extras
+     */
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        // unused method
+        // unused
     }
 
+    /**
+     * do something when GPS provider has been enabled <br>
+     * not supported yet - is not properly called by the system
+     * @param provider
+     */
     @Override
     public void onProviderEnabled(String provider) {
+        // unused
     }
 
     boolean dialogHasAlreadyOccured = false;
     boolean dialogWlanHasAlreadyOccured = false;
 
+    /**
+     * get dialog when GPS provider is / gets disabled
+     * @param provider
+     */
     @Override
     public void onProviderDisabled(String provider) {
         if(!dialogHasAlreadyOccured) {
@@ -94,6 +127,10 @@ public abstract class ConnectionListener extends AppCompatActivity implements Lo
         }
     }
 
+    /**
+     * GPS dialog <br>
+     * cancel or go to settings
+     */
     public void gpsSettingsDialog(){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle("Enable Location");
@@ -111,46 +148,5 @@ public abstract class ConnectionListener extends AppCompatActivity implements Lo
         });
         AlertDialog alert = alertDialog.create();
         alert.show();
-    }
-
-    //wlan listener
-    public void checkInternetConnection(Context context){
-        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (activeNetwork == null){
-            if(!dialogWlanHasAlreadyOccured) {
-                internetSettingsDialog();
-                dialogWlanHasAlreadyOccured = true;
-            }else{
-                dialogWlanHasAlreadyOccured = false;
-            }
-        }else if(!activeNetwork.isConnectedOrConnecting()){
-            internetConnectionInfo(context);
-        }
-    }
-
-    public void internetSettingsDialog(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("Enable Internet");
-        alertDialog.setMessage("You have no internet connection. Please enabled it in settings menu.");
-        alertDialog.setPositiveButton("Internet Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                startActivity(intent);
-            }
-        });
-        // todo: add 3rd button for internet
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        AlertDialog alert = alertDialog.create();
-        alert.show();
-    }
-
-    public void internetConnectionInfo(Context context){
-        // todo: add information dialog no connection
-        Toast.makeText(context, "internet not working", Toast.LENGTH_LONG).show();
     }
 }

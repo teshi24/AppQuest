@@ -1,3 +1,19 @@
+/**
+ * Date:            25.11.2017
+ * Version:         1.0
+ * Author:          Natalie Stalder, Nadja Stadelmann
+ * AppQuest:        Team:       Brudinne
+ * App 4:                       Schatzkarte
+ * Version Test:    Handy:      APK 23
+ *                  Emulator:   APK 26
+ * <p>
+ * V 1.0
+ * -----
+ * app is running as wanted
+ * small bugs:
+ * - asking for permission after installing the app causes close
+ *   --> app has to be restarted afterwards, then it works properly
+ */
 package com.appquest.brudinne.treasurehunt;
 
 import android.content.Context;
@@ -6,9 +22,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -29,12 +48,11 @@ import org.osmdroid.views.overlay.Marker;
 
 import java.util.ArrayList;
 
-public class MainActivity extends ConnectionListener {
+public class MainActivity extends LocationHandler {
+    // variables for views
     private MapView map;
     private IMapController controller;
-
-    private ArrayList<Marker> items = new ArrayList<>();
-    Marker newMarker;
+    private ArrayList<Marker> items = new ArrayList();
 
     // variables to save list in JSON
     private SharedPreferences settings;
@@ -42,8 +60,10 @@ public class MainActivity extends ConnectionListener {
     public static final String FILE_NAME = "MyLatLonFile";
     public static final String STRING_NAME = "JSON";
 
+    // variables for requests
     public static final int PERMISSIONS_REQUEST = 0;
 
+    // variables for permission handling
     private boolean permissionChecked = false;
     private boolean permissionOK = false;
     private boolean permissionDenied = false;
@@ -52,6 +72,10 @@ public class MainActivity extends ConnectionListener {
     // android lifecycle handling
     // --------------------------
 
+    /**
+     * creation of the app - initialize views
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,16 +100,8 @@ public class MainActivity extends ConnectionListener {
     }
 
     /**
-     * save our view on pause
+     * resume app - check permission and update location manager
      */
-    @Override
-    protected void onPause() {
-        super.onPause();
-        super.removeLocationUpdates(this);
-
-        saveJSONArray();
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -132,21 +148,26 @@ public class MainActivity extends ConnectionListener {
 
     }
 
+    /**
+     * save our view on pause
+     */
     @Override
-    public void getLocation(Context context) {
-        super.getLocation(this);
-        if (location != null) {
-            onLocationChanged(location);
-            gotoLocation(new View(this));
-        } else {
-            controller.setZoom(18);
-            Toast.makeText(this, "Wait for GPS.", Toast.LENGTH_SHORT).show();
-        }
+    protected void onPause() {
+        super.onPause();
+        super.removeLocationUpdates(this);
+
+        saveJSONArray();
     }
+
 
     // permission handling
     // -------------------
 
+    /**
+     * get GPS permission
+     * @return true if permission granted <br>
+     *     false if permission denied
+     */
     @Override
     public boolean checkPermission() {
         if (Build.VERSION.SDK_INT >= 23 &&
@@ -157,6 +178,12 @@ public class MainActivity extends ConnectionListener {
         return true;
     }
 
+    /**
+     * evaluate result of permission request
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -179,6 +206,18 @@ public class MainActivity extends ConnectionListener {
 
     // location handling
     // -----------------
+
+    @Override
+    public void getLocation(Context context) {
+        super.getLocation(this);
+        if (location != null) {
+            onLocationChanged(location);
+            gotoLocation(new View(this));
+        } else {
+            controller.setZoom(18);
+            Toast.makeText(this, "Wait for GPS.", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     public void onLocationChanged(Location location) {
@@ -208,7 +247,7 @@ public class MainActivity extends ConnectionListener {
 
     public void addMarkerToList(Location location) {
         if(location != null) {
-            newMarker = new Marker(map);
+            Marker newMarker = new Marker(map);
             newMarker.setPosition(new GeoPoint(location));
             newMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
             newMarker.setIcon(getResources().getDrawable(R.drawable.location_icon));
@@ -245,9 +284,66 @@ public class MainActivity extends ConnectionListener {
         }
     }
 
+    /**
+     * update map after adding markers
+     */
     private void reloadMap() {
         controller.setZoom(map.getZoomLevel() - 1);
         controller.setZoom(map.getZoomLevel() + 1);
+    }
+
+
+    /**
+     * checks if the internet is accessible
+     * @param context
+     */
+    public void checkInternetConnection(Context context){
+        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        if (activeNetwork == null){
+            if(!dialogWlanHasAlreadyOccured) {
+                internetSettingsDialog();
+                dialogWlanHasAlreadyOccured = true;
+            }else{
+                dialogWlanHasAlreadyOccured = false;
+            }
+        }else if(!activeNetwork.isConnectedOrConnecting()){
+            internetConnectionInfo(context);
+        }
+    }
+
+    /**
+     * internet dialog <br>
+     * cancel or go to wlan settings or go to internet settings
+     */
+    public void internetSettingsDialog(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Enable Internet");
+        alertDialog.setMessage("You have no internet connection. Please enabled it in settings menu.");
+        alertDialog.setPositiveButton("Internet Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                startActivity(intent);
+            }
+        });
+        // todo: add 3rd button for internet
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = alertDialog.create();
+        alert.show();
+    }
+
+    // TODO: maybe delete
+    /**
+     * information when internet is enabled but there is no access
+     * @param context
+     */
+    public void internetConnectionInfo(Context context){
+        // todo: add information dialog no connection
+        Toast.makeText(context, "internet not working", Toast.LENGTH_LONG).show();
     }
 
 
