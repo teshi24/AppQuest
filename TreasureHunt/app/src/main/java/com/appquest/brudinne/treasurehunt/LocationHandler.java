@@ -111,7 +111,6 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
     }
 
     boolean dialogHasAlreadyOccured = false;
-    boolean dialogWlanHasAlreadyOccured = false;
 
     /**
      * get dialog when GPS provider is / gets disabled
