@@ -7,10 +7,10 @@
  * App 3:           Schatzkarte
  * Version Test:    Handy:           APK 23
  *                  Emulator:        APK 26
- * <br>
+ * 
  * Version Changes
  * ---------------
- * <br>
+ *
  * V 2.0
  * -----
  * app improved significantly
@@ -21,7 +21,8 @@
  * - dialog for gps-settings added
  * - dialog for current-location-settings added
  * - app is now zooming in to the right current position
- * <br>
+ * - permission problem fixed
+ * 
  * V 1.0
  * -----
  * app is running as wanted
@@ -29,6 +30,8 @@
  * - no information to turn on gps
  * - gps not implemented properly it is zooming in to the wrong location (not current location of mobile)
  * - no information to about the connectivity status
+ * - permission request stops app, it needs to be restarted after accepting the permission
+ * 
  */
 package com.appquest.brudinne.treasurehunt;
 
@@ -106,8 +109,7 @@ public class MainActivity extends LocationHandler {
 
         getSavedJSONArray();
 
-        //checkPermission();
-        //permissionChecked = true;
+        //permissionRequested = false;
     }
 
     /**
@@ -116,23 +118,18 @@ public class MainActivity extends LocationHandler {
     @Override
     public void onResume() {
         super.onResume();
-        if(checkPermission(this)) {
-            //this will refresh the osmdroid configuration on resuming.
-            Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
+        if(!permissionRequested) {
+            if (checkPermission(this, true)) {
+                //this will refresh the osmdroid configuration on resuming.
+                Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-            if (permissionChecked) {
                 internetHandler.checkInternetConnection(this);
                 getLocation(this);
-            } else {
-                // Toast.makeText(this, "onResume Permission not available", Toast.LENGTH_LONG).show();
-                //checkPermission();
-                //finishAffinity();
             }
-
-            if (!permissionDenied) {
-                internetHandler.checkInternetConnection(this);
-                getLocation(this);
-            } else {
+        } else {
+            // ending app if permission was not granted
+            if(!checkPermission(this, false)) {
+                Toast.makeText(this, "GPS permission not granted.", Toast.LENGTH_LONG).show();
                 finishAffinity();
             }
         }
@@ -147,54 +144,6 @@ public class MainActivity extends LocationHandler {
         super.removeLocationUpdates(this);
 
         saveJSONArray();
-    }
-
-
-    // permission handling
-    // -------------------
-
-    /**
-     * get GPS permission
-     * @return true if permission granted <br>
-     *     false if permission denied
-     */
-    /*
-    @Override
-    public boolean checkPermission() {
-        if (Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
-            return false;
-        }
-        return true;
-    }
-    */
-
-    /**
-     * evaluate result of permission request
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-
-            case PERMISSIONS_REQUEST: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length == 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Intent intent = new Intent(Intent.ACTION_MAIN);
-                    intent.addCategory(Intent.CATEGORY_HOME);
-                    startActivity(intent);
-                /*
-
-                    permissionDenied = true;
-                    return;
-                */
-                }
-                //permissionOK = true;
-            }
-        }
     }
 
 

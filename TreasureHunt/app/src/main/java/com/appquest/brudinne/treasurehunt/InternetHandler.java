@@ -9,19 +9,21 @@ import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
-/**
- * Created by Nadja on 24.11.2017.
- */
 
 public class InternetHandler {
 
+    // dialog flag
     boolean dialogWlanHasAlreadyOccured = false;
 
-    Context context;
+    // context variable
+    private Context context;
 
     public InternetHandler(Context context){
         this.context = context;
     }
+
+    // internet handling
+    // -----------------
 
     /**
      * checks if the internet is accessible

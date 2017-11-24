@@ -20,122 +20,58 @@ import android.widget.Toast;
 
 import org.osmdroid.util.GeoPoint;
 
-/**
- * Created by Nadja on 23.11.2017.
- */
 public abstract class LocationHandler extends AppCompatActivity implements LocationListener {
+
+    // request flags
+    protected static final int PERMISSIONS_REQUEST = 0;
+    protected boolean permissionRequested;
+
+    // dialog flag
+    private boolean dialogHasAlreadyOccured = false;
+
+    // location variables
     protected LocationManager locationManager;
     protected Location location;
     protected GeoPoint geoPoint;
     protected String provider;
     protected double latitude, longitude;
+    protected boolean setCenter;
+
+
+    // permission handling
+    // -------------------
 
     /**
-     * remove updates from locationManager
+     * get GPS permission
      * @param context
-     */
-    public void removeLocationUpdates(Context context){
-        if(checkPermission(context)){
-            // todo: remove this
-            if(locationManager != null)
-            locationManager.removeUpdates((LocationListener) context);
-        }
-    }
-
-    /**
-     * get current Location
-     * @param context
-     */
-    public void getLocation(Context context) {
-        if(checkPermission(context)) {
-            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-            Criteria criteria = new Criteria();
-            provider = locationManager.getBestProvider(criteria, false);
-
-            locationManager.requestLocationUpdates(provider, 0, 0, (LocationListener) context);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, (LocationListener) context);
-
-            location = locationManager.getLastKnownLocation(provider);
-        }
-    }
-
-    /**
-     * implements check off all needed permissions <br>
-     * at least GPS permission must get granted
+     * @param doRequest true if it should be asked for request if it doesn't exist, false if only the permission should be checked
      * @return true if permission granted <br>
      *     false if permission denied
      */
-
-    //public abstract boolean checkPermission();
-
-    // unused needed methods
-    // ---------------------
-
-    protected boolean setCenter;
-
-    /**
-     * get new location information as soon as the location has changed
-     * @param location
-     */
-    @Override
-    public void onLocationChanged(Location location) {
-        setCenter = false;
-        this.location = location;
-        if (latitude == 0 && longitude == 0) {
-            setCenter = true;
+    public boolean checkPermission(Context context, boolean doRequest) {
+        if (Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if(doRequest) {
+                ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
+            }
+            return false;
         }
-        longitude = location.getLongitude();
-        latitude = location.getLatitude();
-        if (geoPoint != null) {
-            geoPoint.setCoords(latitude, longitude);
-        } else {
-            geoPoint = new GeoPoint(location);
-        }
-        // todo: delete this before upload to manuel
-        Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
+        return true;
     }
 
     /**
-     * do something when GPS provider status has changed <br>
-     * not supported yet
-     * @param provider
-     * @param status
-     * @param extras
+     * evaluate result of permission request
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
      */
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        // unused
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        permissionRequested = true;
     }
 
-    /**
-     * do something when GPS provider has been enabled <br>
-     * not supported yet - is not properly called by the system
-     * @param provider
-     */
-    @Override
-    public void onProviderEnabled(String provider) {
-        // unused
-    }
-
-    boolean dialogHasAlreadyOccured = false;
-
-    /**
-     * get dialog when GPS provider is / gets disabled
-     * @param provider
-     */
-    @Override
-    public void onProviderDisabled(String provider) {
-        if(!dialogHasAlreadyOccured) {
-            gpsSettingsDialog();
-            dialogHasAlreadyOccured = true;
-        }else{
-            dialogHasAlreadyOccured = false;
-        }
-    }
-
-
-    public static final int PERMISSIONS_REQUEST = 0;
+    // setting handling
+    // ----------------
 
     /**
      * GPS dialog <br>
@@ -160,12 +96,98 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
         alert.show();
     }
 
-    public boolean checkPermission(Context context) {
-        if (Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions((Activity)context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
-            return false;
+
+    // location handling
+    // -----------------
+
+    /**
+     * remove updates from locationManager
+     * @param context
+     */
+    public void removeLocationUpdates(Context context){
+        if(checkPermission(context, true)){
+            // todo: remove this
+            if(locationManager != null)
+                locationManager.removeUpdates((LocationListener) context);
         }
-        return true;
+    }
+
+    /**
+     * get current Location
+     * @param context
+     */
+    public void getLocation(Context context) {
+        if(checkPermission(context, true)) {
+            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+            Criteria criteria = new Criteria();
+            provider = locationManager.getBestProvider(criteria, false);
+
+            locationManager.requestLocationUpdates(provider, 0, 0, (LocationListener) context);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, (LocationListener) context);
+
+            location = locationManager.getLastKnownLocation(provider);
+        }
+    }
+
+    /**
+     * get new location information as soon as the location has changed
+     * @param location
+     */
+    @Override
+    public void onLocationChanged(Location location) {
+        setCenter = false;
+        this.location = location;
+        if (latitude == 0 && longitude == 0) {
+            setCenter = true;
+        }
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
+        if (geoPoint != null) {
+            geoPoint.setCoords(latitude, longitude);
+        } else {
+            geoPoint = new GeoPoint(location);
+        }
+        // todo: delete this before upload to manuel
+        Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * get dialog when GPS provider is / gets disabled
+     * @param provider
+     */
+    @Override
+    public void onProviderDisabled(String provider) {
+        if(!dialogHasAlreadyOccured) {
+            gpsSettingsDialog();
+            dialogHasAlreadyOccured = true;
+        }else{
+            dialogHasAlreadyOccured = false;
+        }
+    }
+
+    // unused methods from LocationListener
+    // ------------------------------------
+
+    /**
+     * do something when GPS provider status has changed <br>
+     * not supported yet
+     * @param provider
+     * @param status
+     * @param extras
+     */
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // unused
+    }
+
+    /**
+     * do something when GPS provider has been enabled <br>
+     * not supported yet - is not properly called by the system
+     * @param provider
+     */
+    @Override
+    public void onProviderEnabled(String provider) {
+        // unused
     }
 }
