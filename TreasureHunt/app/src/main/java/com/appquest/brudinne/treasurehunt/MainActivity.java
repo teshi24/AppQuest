@@ -1,18 +1,34 @@
 /**
  * Date:            25.11.2017
- * Version:         1.0
+ * Version:         2.0
  * Author:          Natalie Stalder, Nadja Stadelmann
- * AppQuest:        Team:       Brudinne
- * App 4:                       Schatzkarte
- * Version Test:    Handy:      APK 23
- *                  Emulator:   APK 26
- * <p>
+ * AppQuest 2017:
+ * Team:            Brudinne
+ * App 3:           Schatzkarte
+ * Version Test:    Handy:           APK 23
+ *                  Emulator:        APK 26
+ * <br>
+ * Version Changes
+ * ---------------
+ * <br>
+ * V 2.0
+ * -----
+ * app improved significantly
+ * changes:
+ * - colors changed
+ * - internet-connection-checker added
+ * - dialog to internet-connection-settings added
+ * - dialog for gps-settings added
+ * - dialog for current-location-settings added
+ * - app is now zooming in to the right current position
+ * <br>
  * V 1.0
  * -----
  * app is running as wanted
- * small bugs:
- * - asking for permission after installing the app causes close
- *   --> app has to be restarted afterwards, then it works properly
+ * bugs:
+ * - no information to turn on gps
+ * - gps not implemented properly it is zooming in to the wrong location (not current location of mobile)
+ * - no information to about the connectivity status
  */
 package com.appquest.brudinne.treasurehunt;
 
@@ -100,32 +116,26 @@ public class MainActivity extends LocationHandler {
     @Override
     public void onResume() {
         super.onResume();
+        if(checkPermission(this)) {
+            //this will refresh the osmdroid configuration on resuming.
+            Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
-            if(checkPermission(this)) {
-                //this will refresh the osmdroid configuration on resuming.
-                Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
-
-                // todo: check internet - use method noInternet() for alert
-                //todo: check if ok
-
-                //getLocation();
-
-                if (permissionChecked) {
-                    internetHandler.checkInternetConnection(this);
-                    getLocation(this);
-                } else {
-                    // Toast.makeText(this, "onResume Permission not available", Toast.LENGTH_LONG).show();
-                    //checkPermission();
-                    //finishAffinity();
-                }
-
-                if (!permissionDenied) {
-                    internetHandler.checkInternetConnection(this);
-                    getLocation(this);
-                } else {
-                    finishAffinity();
-                }
+            if (permissionChecked) {
+                internetHandler.checkInternetConnection(this);
+                getLocation(this);
+            } else {
+                // Toast.makeText(this, "onResume Permission not available", Toast.LENGTH_LONG).show();
+                //checkPermission();
+                //finishAffinity();
             }
+
+            if (!permissionDenied) {
+                internetHandler.checkInternetConnection(this);
+                getLocation(this);
+            } else {
+                finishAffinity();
+            }
+        }
     }
 
     /**
