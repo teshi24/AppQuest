@@ -43,7 +43,6 @@ public class InternetHandler {
         }
     }
 
-
     /**
      * internet dialog <br>
      * cancel or go to wlan settings or go to internet settings
@@ -71,9 +70,5 @@ public class InternetHandler {
         });
         AlertDialog alert = alertDialog.create();
         alert.show();
-    }
-
-    public void setDialogHasAlreadyOccured(boolean dialogHasAlreadyOccured) {
-        this.dialogHasAlreadyOccured = dialogHasAlreadyOccured;
     }
 }

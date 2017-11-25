@@ -139,9 +139,6 @@ public class MainActivity extends LocationHandler {
     protected void onPause() {
         super.onPause();
         super.removeLocationUpdates(this);
-        
-        dialogHasAlreadyOccured = false;
-        internetHandler.setDialogHasAlreadyOccured(false);
 
         saveJSONArray();
     }
@@ -366,9 +363,9 @@ public class MainActivity extends LocationHandler {
             } catch (JSONException e) {
                 return;
             }
+            intent.putExtra("ch.appquest.logmessage", log.toString());
+            startActivity(intent);
         }
-        intent.putExtra("ch.appquest.logmessage", log.toString());
-        startActivity(intent);
     }
 
     /**
