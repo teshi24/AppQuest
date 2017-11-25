@@ -5,32 +5,40 @@
     android:layout_height="match_parent"
     tools:context="com.appquest.brudinne.treasurehunt.MainActivity">
 
-    <org.osmdroid.views.MapView android:id="@+id/map"
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 
     <LinearLayout
         android:id="@+id/footer"
+        style="@android:style/ButtonBar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
         android:background="@color/colorPrimary"
-        android:layout_alignParentBottom="true" style="@android:style/ButtonBar">
+        android:orientation="horizontal">
 
-        <Button android:id="@+id/saveButton" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:layout_weight="1"
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@color/colorPrimaryDark"
+            android:onClick="addLocationToMap"
             android:text="add location"
-            android:textColor="@color/withe"
-            android:layout_margin="5dp"
-            android:background="@color/colorPrimaryDark"
-            android:onClick="addLocationToMap"/>
+            android:textColor="@color/withe" />
 
-        <Button android:id="@+id/cancelButton" android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:layout_weight="1"
-            android:text="goto location"
-            android:textColor="@color/withe"
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_margin="5dp"
+            android:layout_weight="1"
             android:background="@color/colorPrimaryDark"
-            android:onClick="gotoLocation"/>
+            android:onClick="gotoLocation"
+            android:text="goto location"
+            android:textColor="@color/withe" />
     </LinearLayout>
 </RelativeLayout>

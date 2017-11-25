@@ -16,7 +16,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import org.osmdroid.util.GeoPoint;
 
@@ -27,7 +26,7 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
     protected boolean permissionRequested;
 
     // dialog flag
-    private boolean dialogHasAlreadyOccured = false;
+    protected boolean dialogHasAlreadyOccured = false;
 
     // location variables
     protected LocationManager locationManager;
@@ -43,24 +42,27 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
 
     /**
      * get GPS permission
+     *
      * @param context
      * @param doRequest true if it should be asked for request if it doesn't exist, false if only the permission should be checked
      * @return true if permission granted <br>
-     *     false if permission denied
+     * false if permission denied
      */
     public boolean checkPermission(Context context, boolean doRequest) {
+        boolean returnValue = true;
         if (Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if(doRequest) {
+            returnValue = false;
+            if (doRequest) {
                 ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST);
             }
-            return false;
         }
-        return true;
+        return returnValue;
     }
 
     /**
      * evaluate result of permission request
+     *
      * @param requestCode
      * @param permissions
      * @param grantResults
@@ -77,7 +79,7 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
      * GPS dialog <br>
      * cancel or go to settings
      */
-    public void gpsSettingsDialog(){
+    private void gpsSettingsDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle("Enable Location");
         alertDialog.setMessage("Your locations setting is not enabled. Please enabled it in settings menu.");
@@ -102,22 +104,23 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
 
     /**
      * remove updates from locationManager
+     *
      * @param context
      */
-    public void removeLocationUpdates(Context context){
-        if(checkPermission(context, true)){
-            // todo: remove this
-            if(locationManager != null)
+    protected void removeLocationUpdates(Context context) {
+        if (checkPermission(context, true)) {
+            if (locationManager != null)
                 locationManager.removeUpdates((LocationListener) context);
         }
     }
 
     /**
      * get current Location
+     *
      * @param context
      */
-    public void getLocation(Context context) {
-        if(checkPermission(context, true)) {
+    protected void getLocation(Context context) {
+        if (checkPermission(context, true)) {
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
             Criteria criteria = new Criteria();
@@ -132,6 +135,7 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
 
     /**
      * get new location information as soon as the location has changed
+     *
      * @param location
      */
     @Override
@@ -148,20 +152,19 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
         } else {
             geoPoint = new GeoPoint(location);
         }
-        // todo: delete this before upload to manuel
-        Toast.makeText(this, latitude + ", " + longitude, Toast.LENGTH_LONG).show();
     }
 
     /**
      * get dialog when GPS provider is / gets disabled
+     *
      * @param provider
      */
     @Override
     public void onProviderDisabled(String provider) {
-        if(!dialogHasAlreadyOccured) {
+        if (!dialogHasAlreadyOccured) {
             gpsSettingsDialog();
             dialogHasAlreadyOccured = true;
-        }else{
+        } else {
             dialogHasAlreadyOccured = false;
         }
     }
@@ -172,6 +175,7 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
     /**
      * do something when GPS provider status has changed <br>
      * not supported yet
+     *
      * @param provider
      * @param status
      * @param extras
@@ -184,6 +188,7 @@ public abstract class LocationHandler extends AppCompatActivity implements Locat
     /**
      * do something when GPS provider has been enabled <br>
      * not supported yet - is not properly called by the system
+     *
      * @param provider
      */
     @Override

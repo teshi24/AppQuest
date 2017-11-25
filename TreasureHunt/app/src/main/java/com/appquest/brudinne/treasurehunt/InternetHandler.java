@@ -7,59 +7,64 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
 
 
 public class InternetHandler {
 
     // dialog flag
-    boolean dialogWlanHasAlreadyOccured = false;
+    private boolean dialogHasAlreadyOccured = false;
 
     // context variable
     private Context context;
 
-    public InternetHandler(Context context){
+    public InternetHandler(Context context) {
         this.context = context;
     }
+
 
     // internet handling
     // -----------------
 
     /**
      * checks if the internet is accessible
+     *
      * @param context
      */
-    public void checkInternetConnection(Context context){
-        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    public void checkInternetConnection(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (activeNetwork == null){
-            if(!dialogWlanHasAlreadyOccured) {
+        if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting()) {
+            if (!dialogHasAlreadyOccured) {
                 internetSettingsDialog();
-                dialogWlanHasAlreadyOccured = true;
-            }else{
-                dialogWlanHasAlreadyOccured = false;
+                dialogHasAlreadyOccured = true;
+            } else {
+                dialogHasAlreadyOccured = false;
             }
-        }else if(!activeNetwork.isConnectedOrConnecting()){
-            internetConnectionInfo(context);
         }
     }
+
 
     /**
      * internet dialog <br>
      * cancel or go to wlan settings or go to internet settings
      */
-    public void internetSettingsDialog(){
+    private void internetSettingsDialog() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
         alertDialog.setTitle("Enable Internet");
         alertDialog.setMessage("You have no internet connection. Please enabled it in settings menu.");
         alertDialog.setPositiveButton("Internet Settings", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_DATA_ROAMING_SETTINGS);
+                context.startActivity(intent);
+            }
+        });
+        alertDialog.setNegativeButton("Wlan Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
                 Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
                 context.startActivity(intent);
             }
         });
-        // todo: add 3rd button for internet
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        alertDialog.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
             }
@@ -68,13 +73,7 @@ public class InternetHandler {
         alert.show();
     }
 
-    // TODO: maybe delete
-    /**
-     * information when internet is enabled but there is no access
-     * @param context
-     */
-    public void internetConnectionInfo(Context context){
-        // todo: add information dialog no connection
-        Toast.makeText(context, "internet not working", Toast.LENGTH_LONG).show();
+    public void setDialogHasAlreadyOccured(boolean dialogHasAlreadyOccured) {
+        this.dialogHasAlreadyOccured = dialogHasAlreadyOccured;
     }
 }
