@@ -2,10 +2,12 @@
  * Date:            03.11.2017
  * Version:         2.0
  * Author:          Natalie Stalder, Nadja Stadelmann
- * AppQuest:        Team:       Brudinne
- * App 3:      Memory
- * Version Test:    Handy:      APK 23
- * Emulator:   APK 26
+ * AppQuest 2017:
+ * Team:            Brudinne
+ * App 3:           Memory
+ * Version Test:
+ * Handy:           APK 23
+ * Emulator:        APK 26
  * <p>
  * Version Changes
  * ---------------
