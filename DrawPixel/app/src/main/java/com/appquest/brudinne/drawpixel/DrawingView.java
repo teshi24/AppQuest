@@ -53,24 +53,27 @@ public class DrawingView extends View {
 
         // TODO Zeichne das Gitter
         // Draw horizontal lines
-        for (int i = 1; i < GRID_SIZE; i++) {
+        /*for (int i = 1; i < GRID_SIZE; i++) {
             canvas.drawLine(i * stepSizeX, 0, i * stepSizeX, maxY, linePaint);
         }
         // Draw vertical lines
         for (int i = 1; i < GRID_SIZE; i++) {
             canvas.drawLine(0, i * stepSizeY, maxX, i * stepSizeY, linePaint);
-        }
+        }*/
         // draw border
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
                 //if (cellChecked[i][j]) {
 
-                    canvas.drawRect(i * stepSizeX, j * stepSizeY,
-                            (i + 1) * stepSizeX, (j + 1) * stepSizeY,
-                            linePaint);
+                    canvas.drawRect(i * stepSizeX, j * stepSizeY, (i + 1) * stepSizeX, (j + 1) * stepSizeY, linePaint);
                 //}
             }
         }
+
+        // TODO: check if we can get maxX and max to something dividing through 13
+        canvas.drawLine(0, maxY, maxX, maxY, linePaint);
+        canvas.drawLine(maxX, 0, maxX, maxY, linePaint);
+
         // Zeichnet einen Pfad der dem Finger folgt
         canvas.drawPath(drawPath, drawPaint);
     }
