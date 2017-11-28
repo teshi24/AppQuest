@@ -12,6 +12,9 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * Die DrawingView ist für die Darstellung und Verwaltung der Zeichenfläche
  * zuständig.
@@ -20,10 +23,11 @@ public class DrawingView extends View {
 
     private static final int GRID_SIZE = 13;
 
-    private Path drawPath = new Path();
-    private Paint drawPaint = new Paint();
-    private Paint linePaint = new Paint();
-    private boolean isErasing = false;
+    private Path drawPath                   = new Path();
+    private Paint drawPaint                 = new Paint();
+    private Paint linePaint                 = new Paint();
+    private boolean isErasing               = false;
+    private HashMap<Float, Float> positions = new HashMap<>();
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,16 +66,23 @@ public class DrawingView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 drawPath.moveTo(touchX, touchY);
-                // TODO wir müssen uns die berührten Punkte zwischenspeichern
+                // save touched pixels
+                positions.put(touchX, touchY);
                 break;
             case MotionEvent.ACTION_MOVE:
                 drawPath.lineTo(touchX, touchY);
-                // TODO wir müssen uns die berührten Punkte zwischenspeichern
+                // Save touched pixels
+                positions.put(touchX, touchY);
                 break;
             case MotionEvent.ACTION_UP:
-                // TODO Jetzt können wir die zwischengespeicherten Punkte auf das
-                // Gitter umrechnen und zeichnen, bzw. löschen, falls wir isErasing
-                // true ist (optional)
+                for(Float x : positions.keySet()){
+                    Float y = positions.get(x);
+                    if(!isErasing){
+                        // TODO: add chosen color to big pixels
+                    } else {
+                        // TODO: Delete Color in big pixels
+                    }
+                }
                 drawPath.reset();
                 break;
             default:
@@ -96,7 +107,7 @@ public class DrawingView extends View {
         }
     }
 
-    public boolean isErasing() {
+    public boolean getIsErasing() {
         return isErasing;
     }
 

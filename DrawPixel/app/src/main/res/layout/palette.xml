@@ -21,10 +21,10 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="#ff13b717"
+        android:background="#FF13b717"
         android:contentDescription="@string/paint"
         android:onClick="paintClicked"
-        android:tag="#ff13b717" />
+        android:tag="#FF13b717" />
 
     <ImageButton
         android:id="@+id/color9"

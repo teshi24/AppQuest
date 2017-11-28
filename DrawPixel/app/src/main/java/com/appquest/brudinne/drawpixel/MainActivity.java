@@ -73,10 +73,6 @@ public class MainActivity extends AppCompatActivity {
         drawingView.setErase(false);
     }
 
-    private void onLogAction() {
-        // TODO
-    }
-
     // log message handling
     // --------------------
 
