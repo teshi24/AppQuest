@@ -6,7 +6,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ImageButton
-
         android:id="@+id/defaultColor"
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -17,7 +16,7 @@
         android:tag="#FF1364b7" />
 
     <ImageButton
-        android:id="@+id/color8"
+        android:id="@+id/paintGreen"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -27,7 +26,7 @@
         android:tag="#FF13b717" />
 
     <ImageButton
-        android:id="@+id/color9"
+        android:id="@+id/paintYellow"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -37,7 +36,7 @@
         android:tag="#FFffea00" />
 
     <ImageButton
-        android:id="@+id/color10"
+        android:id="@+id/paintRed"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -48,7 +47,7 @@
 
 
     <ImageButton
-        android:id="@+id/color11"
+        android:id="@+id/paintBlack"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -59,7 +58,7 @@
 
 
     <ImageButton
-        android:id="@+id/color12"
+        android:id="@+id/paintGrey"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
