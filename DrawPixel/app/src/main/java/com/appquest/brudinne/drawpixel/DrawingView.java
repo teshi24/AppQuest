@@ -31,6 +31,7 @@ public class DrawingView extends View {
     private Paint linePaint                 = new Paint();
     private boolean isErasing               = false;
     private HashMap<Float, Float> positions = new HashMap<>();
+    private ArrayList<DrawingPixel> pixelList = new ArrayList<>();
 
     private ArrayList<ArrayList<Paint>> pixels;
 

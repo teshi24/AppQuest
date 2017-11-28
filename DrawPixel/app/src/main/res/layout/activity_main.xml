@@ -8,6 +8,8 @@
     android:orientation="vertical"
     tools:context="com.appquest.brudinne.drawpixel.MainActivity">
 
+    <include layout="@layout/edit_options"></include>
+
     <com.appquest.brudinne.drawpixel.SquareLayout
         android:id="@+id/SquareLayout1"
         android:layout_width="match_parent"
