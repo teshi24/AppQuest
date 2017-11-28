@@ -16,6 +16,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     private DrawingView drawingView;
@@ -99,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
         menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                //log(drawingView.getList());
                 log();
                 return false;
             }
@@ -106,21 +109,36 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-
     /**
      * send log message to Logbook
      */
     private void log() {
-        //todo: log entsprechend anpassen
         Intent intent = new Intent("ch.appquest.intent.LOG");
         JSONObject log = new JSONObject();
         if (checkInstalled(intent, "Logbook")) {
             try {
                 //makeJSONArray();
+                // todo: replace with 'real' array
+                //setPixels();
+
                 JSONArray savedArray = new JSONArray();
+
+                int xLength = pixels.size();
+                for(int x = 0; x<xLength; x++){
+                    int yLength = pixels.get(x).size();
+                    for(int y = 0; y<yLength; y++){
+                        JSONObject pixel = new JSONObject();
+                        pixel.put("y", ""+y);
+                        pixel.put("x", ""+x);
+                        pixel.put("color", pixels.get(x).get(y));
+
+                        savedArray.put(pixel);
+                    }
+                }
+
                 if (savedArray != null && savedArray.length() > 0) {
                     log.put("task", "Pixelmaler");
-                    log.put("points", savedArray);
+                    log.put("pixels", savedArray);
                 } else {
                     Toast.makeText(this, "No matches to log.", Toast.LENGTH_LONG).show();
                     return;
@@ -132,18 +150,15 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         }
     }
-    /* todo: how to log:
-    {
-      "task": "Pixelmaler",
-      "pixels": [
-        {"y":"0","x":"0","color":"#ffea00FF"},
-        {"y":"0","x":"1","color":"#1364b7FF"},
-        {"y":"0","x":"2","color":"#1364b7FF"},
-        {"y":"0","x":"3","color":"#ffea00FF"},
-        ...
-        ]
+
+    private ArrayList<ArrayList<String>> pixels = new ArrayList<>();
+
+    private void setPixels(){
+        ArrayList<String> pixelY = new ArrayList<>();
+        pixelY.add("#FF000000");
+        pixelY.add(((ImageButton)findViewById(R.id.paintBlack)).getTag().toString().toUpperCase());
+        pixels.add(pixelY);
     }
-     */
 
     /**
      * checks, if an app is installed
