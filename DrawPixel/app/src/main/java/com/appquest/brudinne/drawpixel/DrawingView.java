@@ -154,20 +154,13 @@ public class DrawingView extends View {
 
         pixels.get(fieldX).set(fieldY, drawPaint.toString());
 
-        //drawPaint.setShader(new Shader());
-        int i = stepSizeX*fieldX;
-        int j = stepSizeY*fieldY;
-     //   for(int i = stepSizeX*fieldX; i<stepSizeX*(fieldX+1); i++){
-       //     for(int j = stepSizeY*fieldY; j<stepSizeY*(fieldY+1); j++) {
-                Rect rect = new Rect(i, j, i+stepSizeX-1, j+stepSizeY-1);
-                canvas.drawRect(rect, drawPaint);
-        //Paint paint = new Paint();
-        //paint.setColor(Color.BLUE);
-        // canvas.drawRect(rect, paint);
-
-                //canvas.drawPoint(i,j,drawPaint);
-      //      }
-        //}
+        for(int i = stepSizeX * fieldX; i < stepSizeX * (fieldX+1); i++){
+            for(int j = stepSizeY * fieldY; j < stepSizeY * (fieldY+1); j++) {
+                //Rect rect = new Rect(i, j, i+stepSizeX-1, j+stepSizeY-1);
+                //canvas.drawRect(rect, drawPaint);
+                canvas.drawPoint(i,j,drawPaint);
+            }
+        }
     }
 
     public void startNew() {
