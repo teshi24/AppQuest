@@ -13,7 +13,6 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,47 +58,6 @@ public class DrawingView extends View {
             }
             pixels.add(pixelY);
         }
-
-/*        this.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                float touchX = event.getX();
-                float touchY = event.getY();
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        drawPath.moveTo(touchX, touchY);
-                        // save touched pixels
-                        //positions.put(touchX, touchY);
-                        if(isErasing){
-                            drawPaint.setColor(Color.parseColor(""+R.color.white));
-                        }
-                        drawPixel((int)touchX, (int)touchY);
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        drawPath.lineTo(touchX, touchY);
-                        // Save touched pixels
-                        //positions.put(touchX, touchY);
-                        drawPixel((int)touchX, (int)touchY);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        for(Float x : positions.keySet()){
-                            Float y = positions.get(x);
-                            if(!isErasing){
-                                // TODO: add chosen color to big pixels
-                            } else {
-                                // TODO: Delete Color in big pixels
-                            }
-                        }
-                        drawPath.reset();
-                        break;
-                    default:
-                        return false;
-                }
-
-                invalidate();
-                return true;
-            }
-        });*/
     }
 
     Canvas canvas;
@@ -152,10 +110,6 @@ public class DrawingView extends View {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Toast.makeText(context, getWidth() + " " + getHeight(), Toast.LENGTH_SHORT).show();
-        Toast.makeText(context, "pause", Toast.LENGTH_SHORT).show();
-        Toast.makeText(context, canvas.getWidth() + " " + canvas.getHeight(), Toast.LENGTH_SHORT).show();
-        Toast.makeText(context, "end", Toast.LENGTH_SHORT).show();
         float touchX = event.getX();
         float touchY = event.getY();
 
