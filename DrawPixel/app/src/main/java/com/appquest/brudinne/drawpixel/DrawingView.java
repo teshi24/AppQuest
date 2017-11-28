@@ -53,6 +53,14 @@ public class DrawingView extends View {
         final int stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
 
         // TODO Zeichne das Gitter
+        // Draw horizontal lines
+        for (int i = 1; i < GRID_SIZE; i++) {
+            canvas.drawLine(i * stepSizeX, 0, i * stepSizeX, maxY, linePaint);
+        }
+        // Draw vertical lines
+        for (int i = 1; i < GRID_SIZE; i++) {
+            canvas.drawLine(0, i * stepSizeY, maxX, i * stepSizeY, linePaint);
+        }
         // Zeichnet einen Pfad der dem Finger folgt
         canvas.drawPath(drawPath, drawPaint);
     }
@@ -115,4 +123,13 @@ public class DrawingView extends View {
         invalidate();
         drawPaint.setColor(Color.parseColor(color));
     }
+
+/*    public Class Position {
+        private Float posX;
+        private Float posY;
+
+        public Position(Float posX, Float posY){
+            this.posX = posX;
+        }
+    }*/
 }

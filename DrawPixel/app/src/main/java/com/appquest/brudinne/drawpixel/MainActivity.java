@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         drawingView = (DrawingView) findViewById(R.id.drawing);
 
-        currentBrush = (ImageButton) findViewById(R.id.defaultColor);
+        currentBrush = (ImageButton) findViewById(R.id.paintBlue);
         currentBrush.setImageDrawable(getResources().getDrawable(R.drawable.selected));
         String color = currentBrush.getTag().toString();
         drawingView.setColor(color);
