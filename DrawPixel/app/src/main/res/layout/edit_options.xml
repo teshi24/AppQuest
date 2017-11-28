@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="70dp">
+
+    <ImageButton
+        android:id="@+id/pencil"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:layout_margin="5dp"
+        android:src="@drawable/eraser"
+        android:onClick="switchUtil" />
+
+    <ImageButton
+        android:id="@+id/fill_can"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:layout_margin="5dp"
+        android:src="@drawable/eraser"
+        android:onClick="switchUtil" />
+
+    <ImageButton
+        android:id="@+id/erase_btn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:layout_margin="5dp"
+        android:src="@drawable/eraser"
+        android:onClick="switchUtil" />
+
+    <ImageButton
+        android:id="@+id/undo_step"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:layout_margin="5dp"
+        android:src="@drawable/eraser"
+        android:onClick="undo" />
+
+</LinearLayout>
