@@ -3,8 +3,11 @@ package com.appquest.brudinne.drawpixel;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +26,9 @@ public class MainActivity extends AppCompatActivity {
     private DrawingView drawingView;
     private ImageButton currentBrush;
 
+    private SharedPreferences appPreferences;
+    private boolean isShortcutInstalled = false;
+
     public void eraseClicked(View view) {
         if (view != currentBrush) {
             ImageButton imgView = (ImageButton) view;
@@ -32,10 +38,28 @@ public class MainActivity extends AppCompatActivity {
         }
         drawingView.setErase(true);
     }
+    public void createShortCut(){
+        Intent shortcutintent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+        shortcutintent.putExtra("duplicate", false);
+        shortcutintent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.app_name));
+        Parcelable icon = Intent.ShortcutIconResource.fromContext(getApplicationContext(), R.mipmap.ic_launcher);
+        shortcutintent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
+        shortcutintent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(getApplicationContext(), MainActivity.class));
+        sendBroadcast(shortcutintent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        isShortcutInstalled = appPreferences.getBoolean("isShortcutInstalled",false);
+        if(isShortcutInstalled == false){
+            createShortCut();
+            SharedPreferences.Editor editor = appPreferences.edit();
+            editor.putBoolean("isShortcutInstalled", true);
+            editor.commit();
+        }
+
         setContentView(R.layout.activity_main);
         drawingView = (DrawingView) findViewById(R.id.drawing);
 

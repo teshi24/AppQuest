@@ -2,16 +2,20 @@ package com.appquest.brudinne.drawpixel;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -28,8 +32,14 @@ public class DrawingView extends View {
     private boolean isErasing               = false;
     private HashMap<Float, Float> positions = new HashMap<>();
 
+    private ArrayList<ArrayList<String>> pixels;
+
+    Context context;
+
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
+
         drawPaint.setAntiAlias(true);
         drawPaint.setStrokeWidth(20);
         drawPaint.setStyle(Paint.Style.STROKE);
@@ -40,16 +50,77 @@ public class DrawingView extends View {
         linePaint.setAntiAlias(true);
         linePaint.setStrokeWidth(1.0f);
         linePaint.setStyle(Paint.Style.STROKE);
+
+        pixels = new ArrayList();
+        for(int i = 0; i<GRID_SIZE; i++){
+            ArrayList<String> pixelY = new ArrayList();
+            for(int j = 0; j<GRID_SIZE; j++){
+                pixelY.add(""+R.color.white);
+            }
+            pixels.add(pixelY);
+        }
+
+/*        this.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                float touchX = event.getX();
+                float touchY = event.getY();
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        drawPath.moveTo(touchX, touchY);
+                        // save touched pixels
+                        //positions.put(touchX, touchY);
+                        if(isErasing){
+                            drawPaint.setColor(Color.parseColor(""+R.color.white));
+                        }
+                        drawPixel((int)touchX, (int)touchY);
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        drawPath.lineTo(touchX, touchY);
+                        // Save touched pixels
+                        //positions.put(touchX, touchY);
+                        drawPixel((int)touchX, (int)touchY);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        for(Float x : positions.keySet()){
+                            Float y = positions.get(x);
+                            if(!isErasing){
+                                // TODO: add chosen color to big pixels
+                            } else {
+                                // TODO: Delete Color in big pixels
+                            }
+                        }
+                        drawPath.reset();
+                        break;
+                    default:
+                        return false;
+                }
+
+                invalidate();
+                return true;
+            }
+        });*/
     }
+
+    Canvas canvas;
+    int stepSizeX;
+    int stepSizeY;
 
     @Override
     protected void onDraw(Canvas canvas) {
+        this.canvas = canvas;
 
-        final int maxX = canvas.getWidth();
-        final int maxY = canvas.getHeight();
+        final int maxX = getWidth();
+        final int maxY = getHeight();
 
-        final int stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
-        final int stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
+        int pixelCanvas = maxX;
+        int pixelCell = (pixelCanvas - (GRID_SIZE+1))/GRID_SIZE;
+
+        Bitmap bitmap = Bitmap.createBitmap(pixelCanvas,pixelCanvas,Bitmap.Config.ARGB_8888);
+        this.canvas = new Canvas(bitmap);
+
+        stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
+        stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
 
         // TODO Zeichne das Gitter
         // Draw horizontal lines
@@ -64,8 +135,8 @@ public class DrawingView extends View {
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
                 //if (cellChecked[i][j]) {
-
                     canvas.drawRect(i * stepSizeX, j * stepSizeY, (i + 1) * stepSizeX, (j + 1) * stepSizeY, linePaint);
+
                 //}
             }
         }
@@ -81,6 +152,10 @@ public class DrawingView extends View {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        Toast.makeText(context, getWidth() + " " + getHeight(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "pause", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, canvas.getWidth() + " " + canvas.getHeight(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "end", Toast.LENGTH_SHORT).show();
         float touchX = event.getX();
         float touchY = event.getY();
 
@@ -88,12 +163,17 @@ public class DrawingView extends View {
             case MotionEvent.ACTION_DOWN:
                 drawPath.moveTo(touchX, touchY);
                 // save touched pixels
-                positions.put(touchX, touchY);
+                //positions.put(touchX, touchY);
+                if(isErasing){
+                    drawPaint.setColor(Color.parseColor(""+R.color.white));
+                }
+                drawPixel((int)touchX, (int)touchY);
                 break;
             case MotionEvent.ACTION_MOVE:
                 drawPath.lineTo(touchX, touchY);
                 // Save touched pixels
-                positions.put(touchX, touchY);
+                //positions.put(touchX, touchY);
+                drawPixel((int)touchX, (int)touchY);
                 break;
             case MotionEvent.ACTION_UP:
                 for(Float x : positions.keySet()){
@@ -112,6 +192,28 @@ public class DrawingView extends View {
 
         invalidate();
         return true;
+    }
+
+    private void drawPixel(int x, int y){
+        int fieldX = (int)Math.floor(x / stepSizeX);
+        int fieldY = (int)Math.floor(y / stepSizeY);
+
+        pixels.get(fieldX).set(fieldY, drawPaint.toString());
+
+        //drawPaint.setShader(new Shader());
+        int i = stepSizeX*fieldX;
+        int j = stepSizeY*fieldY;
+     //   for(int i = stepSizeX*fieldX; i<stepSizeX*(fieldX+1); i++){
+       //     for(int j = stepSizeY*fieldY; j<stepSizeY*(fieldY+1); j++) {
+                Rect rect = new Rect(i, j, i+stepSizeX-1, j+stepSizeY-1);
+                canvas.drawRect(rect, drawPaint);
+        //Paint paint = new Paint();
+        //paint.setColor(Color.BLUE);
+        // canvas.drawRect(rect, paint);
+
+                //canvas.drawPoint(i,j,drawPaint);
+      //      }
+        //}
     }
 
     public void startNew() {
