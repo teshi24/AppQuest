@@ -13,6 +13,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class DrawingView extends View {
     private boolean isErasing               = false;
     private HashMap<Float, Float> positions = new HashMap<>();
 
-    private ArrayList<ArrayList<String>> pixels;
+    private ArrayList<ArrayList<Paint>> pixels;
 
     Context context;
 
@@ -52,9 +53,9 @@ public class DrawingView extends View {
 
         pixels = new ArrayList();
         for(int i = 0; i<GRID_SIZE; i++){
-            ArrayList<String> pixelY = new ArrayList();
+            ArrayList<Paint> pixelY = new ArrayList();
             for(int j = 0; j<GRID_SIZE; j++){
-                pixelY.add(""+R.color.white);
+                pixelY.add(new Paint(R.color.white));
             }
             pixels.add(pixelY);
         }
@@ -63,13 +64,15 @@ public class DrawingView extends View {
     Canvas canvas;
     int stepSizeX;
     int stepSizeY;
+    int maxX;
+    int maxY;
 
     @Override
     protected void onDraw(Canvas canvas) {
         this.canvas = canvas;
 
-        final int maxX = getWidth();
-        final int maxY = getHeight();
+        maxX = getWidth();
+        maxY = getHeight();
 
         int pixelCanvas = maxX;
         int pixelCell = (pixelCanvas - (GRID_SIZE+1))/GRID_SIZE;
@@ -80,21 +83,11 @@ public class DrawingView extends View {
         stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
         stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
 
-        // TODO Zeichne das Gitter
-        // Draw horizontal lines
-        /*for (int i = 1; i < GRID_SIZE; i++) {
-            canvas.drawLine(i * stepSizeX, 0, i * stepSizeX, maxY, linePaint);
-        }
-        // Draw vertical lines
-        for (int i = 1; i < GRID_SIZE; i++) {
-            canvas.drawLine(0, i * stepSizeY, maxX, i * stepSizeY, linePaint);
-        }*/
         // draw border
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
                 //if (cellChecked[i][j]) {
                     canvas.drawRect(i * stepSizeX, j * stepSizeY, (i + 1) * stepSizeX, (j + 1) * stepSizeY, linePaint);
-
                 //}
             }
         }
@@ -105,6 +98,26 @@ public class DrawingView extends View {
 
         // Zeichnet einen Pfad der dem Finger folgt
         canvas.drawPath(drawPath, drawPaint);
+
+        drawBigPixel(canvas);
+    }
+
+    private void drawBigPixel(Canvas canvas){
+
+        for(int x = 0; x<GRID_SIZE; x++){
+            for(int y = 0; y<GRID_SIZE; y++){
+                //// TODO: 28.11.2017 remove fette linie
+                try{
+                    Paint p = new Paint(pixels.get(x).get(y));
+                    //x *= stepSizeX;
+                    //y *= stepSizeY;
+                    Rect rect = new Rect(x, y, x+stepSizeX-1, y+stepSizeY-1);
+                    canvas.drawRect(rect, p);
+                }catch (Exception ex){
+                    Toast.makeText(context, "color error: " + pixels.get(x).get(y), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -121,14 +134,18 @@ public class DrawingView extends View {
                 if(isErasing){
                     drawPaint.setColor(Color.parseColor(""+R.color.white));
                 }
-                drawPixel((int)touchX, (int)touchY);
+                savePixelForDraw((int)touchX, (int)touchY);
                 break;
             case MotionEvent.ACTION_MOVE:
-                drawPath.lineTo(touchX, touchY);
-                // Save touched pixels
-                //positions.put(touchX, touchY);
-                drawPixel((int)touchX, (int)touchY);
-                break;
+                //todo: besseres handling
+                if(touchX < maxX && touchY < maxY && touchX >= 0 && touchY >= 0){
+                    drawPath.lineTo(touchX, touchY);
+                    // Save touched pixels
+                    //positions.put(touchX, touchY);
+                    savePixelForDraw((int)touchX, (int)touchY);
+                    break;
+                }
+                event.setAction(MotionEvent.ACTION_UP);
             case MotionEvent.ACTION_UP:
                 for(Float x : positions.keySet()){
                     Float y = positions.get(x);
@@ -148,19 +165,36 @@ public class DrawingView extends View {
         return true;
     }
 
-    private void drawPixel(int x, int y){
+    private void savePixelForDraw(int x, int y){
+        int fieldX = (int)Math.floor(x / stepSizeX);
+        int fieldY = (int)Math.floor(y / stepSizeY);
+        //save touched pixel
+        Paint p = new Paint(drawPaint);
+        pixels.get(fieldX).set(fieldY, p);
+    }
+
+    private void drawPixel(int x, int y, Canvas canvas){
         int fieldX = (int)Math.floor(x / stepSizeX);
         int fieldY = (int)Math.floor(y / stepSizeY);
 
-        pixels.get(fieldX).set(fieldY, drawPaint.toString());
+        int i = stepSizeX*fieldX;
+        int j = stepSizeY*fieldY;
+        Rect rect = new Rect(i, j, i+stepSizeX-1, j+stepSizeY-1);
 
+        //// TODO: 28.11.2017 remove fette linie
+        drawPaint.setStrokeWidth(stepSizeX-1);
+        canvas.drawRect(rect, drawPaint);
+
+        /*
         for(int i = stepSizeX * fieldX; i < stepSizeX * (fieldX+1); i++){
             for(int j = stepSizeY * fieldY; j < stepSizeY * (fieldY+1); j++) {
                 //Rect rect = new Rect(i, j, i+stepSizeX-1, j+stepSizeY-1);
                 //canvas.drawRect(rect, drawPaint);
                 canvas.drawPoint(i,j,drawPaint);
+                invalidate();
             }
         }
+        */
     }
 
     public void startNew() {
