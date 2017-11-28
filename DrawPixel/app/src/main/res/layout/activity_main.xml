@@ -3,7 +3,7 @@
     android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/white"
     android:padding="20dp"
     android:orientation="vertical"
     tools:context="com.appquest.brudinne.drawpixel.MainActivity">
@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#FFFFFFFF" />
+            android:background="@color/white" />
     </com.appquest.brudinne.drawpixel.SquareLayout>
 
     <include layout="@layout/palette"></include>
