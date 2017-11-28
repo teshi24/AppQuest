@@ -60,6 +60,17 @@ public class DrawingView extends View {
         for (int i = 1; i < GRID_SIZE; i++) {
             canvas.drawLine(0, i * stepSizeY, maxX, i * stepSizeY, linePaint);
         }
+        // draw border
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                //if (cellChecked[i][j]) {
+
+                    canvas.drawRect(i * stepSizeX, j * stepSizeY,
+                            (i + 1) * stepSizeX, (j + 1) * stepSizeY,
+                            linePaint);
+                //}
+            }
+        }
         // Zeichnet einen Pfad der dem Finger folgt
         canvas.drawPath(drawPath, drawPaint);
     }
