@@ -98,24 +98,24 @@ public class DrawingView extends View {
         canvas.drawLine(maxX, 0, maxX, maxY, linePaint);
 
         // Zeichnet einen Pfad der dem Finger folgt
-        canvas.drawPath(drawPath, drawPaint);
+        //canvas.drawPath(drawPath, drawPaint);
 
         drawBigPixel(canvas);
     }
 
     private void drawBigPixel(Canvas canvas){
 
-        for(int x = 0; x<GRID_SIZE; x++){
-            for(int y = 0; y<GRID_SIZE; y++){
+        for(int i = 0; i<GRID_SIZE; i++){
+            for(int j = 0; j<GRID_SIZE; j++){
                 //// TODO: 28.11.2017 remove fette linie
                 try{
-                    Paint p = new Paint(pixels.get(x).get(y));
-                    //x *= stepSizeX;
-                    //y *= stepSizeY;
+                    Paint p = new Paint(pixels.get(i).get(j));
+                    int x = i*stepSizeX;
+                    int y = j*stepSizeY;
                     Rect rect = new Rect(x, y, x+stepSizeX-1, y+stepSizeY-1);
                     canvas.drawRect(rect, p);
                 }catch (Exception ex){
-                    Toast.makeText(context, "color error: " + pixels.get(x).get(y), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "color error: " + pixels.get(i).get(j), Toast.LENGTH_SHORT).show();
                 }
             }
         }
