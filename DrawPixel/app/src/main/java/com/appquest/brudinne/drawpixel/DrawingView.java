@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -16,7 +17,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Die DrawingView ist für die Darstellung und Verwaltung der Zeichenfläche
@@ -29,26 +29,31 @@ public class DrawingView extends View {
     private Path drawPath                   = new Path();
     private Paint drawPaint                 = new Paint();
     private Paint linePaint                 = new Paint();
+    private Paint initPaint                 = new Paint();
     private boolean isErasing               = false;
-    private HashMap<Float, Float> positions = new HashMap<>();
     private ArrayList<DrawingPixel> pixelList = new ArrayList<>();
 
     private ArrayList<ArrayList<Paint>> pixels;
 
     Context context;
+    Canvas canvas;
+    int stepSizeX;
+    int stepSizeY;
+    int maxX;
+    int maxY;
+
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
 
         drawPaint.setAntiAlias(true);
-        drawPaint.setStrokeWidth(20);
-        drawPaint.setStyle(Paint.Style.STROKE);
-        drawPaint.setStrokeJoin(Paint.Join.ROUND);
-        drawPaint.setStrokeCap(Paint.Cap.ROUND);
 
-        linePaint.setColor(0xFF666666);
+        initPaint.setAntiAlias(true);
+        initPaint.setColor(0xFFFFFFFF);
+
         linePaint.setAntiAlias(true);
+        linePaint.setColor(0xFF666666);
         linePaint.setStrokeWidth(1.0f);
         linePaint.setStyle(Paint.Style.STROKE);
 
@@ -56,17 +61,11 @@ public class DrawingView extends View {
         for(int i = 0; i<GRID_SIZE; i++){
             ArrayList<Paint> pixelY = new ArrayList();
             for(int j = 0; j<GRID_SIZE; j++){
-                pixelY.add(new Paint(R.color.white));
+                pixelY.add(initPaint);
             }
             pixels.add(pixelY);
         }
     }
-
-    Canvas canvas;
-    int stepSizeX;
-    int stepSizeY;
-    int maxX;
-    int maxY;
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -80,6 +79,7 @@ public class DrawingView extends View {
 
         Bitmap bitmap = Bitmap.createBitmap(pixelCanvas,pixelCanvas,Bitmap.Config.ARGB_8888);
         this.canvas = new Canvas(bitmap);
+        this.canvas.drawBitmap(bitmap, new Matrix(), initPaint);
 
         stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
         stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
@@ -98,18 +98,21 @@ public class DrawingView extends View {
         canvas.drawLine(maxX, 0, maxX, maxY, linePaint);
 
         // Zeichnet einen Pfad der dem Finger folgt
-        //canvas.drawPath(drawPath, drawPaint);
+        // canvas.drawPath(drawPath, drawPaint);
 
         drawBigPixel(canvas);
     }
 
     private void drawBigPixel(Canvas canvas){
-
         for(int i = 0; i<GRID_SIZE; i++){
             for(int j = 0; j<GRID_SIZE; j++){
-                //// TODO: 28.11.2017 remove fette linie
                 try{
-                    Paint p = new Paint(pixels.get(i).get(j));
+                    Paint p;
+                    if(pixels.get(i).get(j) != null) {
+                        p = new Paint(pixels.get(i).get(j));
+                    }else{
+                        p = initPaint;
+                    }
                     int x = i*stepSizeX;
                     int y = j*stepSizeY;
                     Rect rect = new Rect(x, y, x+stepSizeX-1, y+stepSizeY-1);
@@ -130,8 +133,6 @@ public class DrawingView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 drawPath.moveTo(touchX, touchY);
-                // save touched pixels
-                //positions.put(touchX, touchY);
                 if(isErasing){
                     drawPaint.setColor(Color.parseColor(""+R.color.white));
                 }
@@ -141,21 +142,11 @@ public class DrawingView extends View {
                 //todo: besseres handling
                 if(touchX < maxX && touchY < maxY && touchX >= 0 && touchY >= 0){
                     drawPath.lineTo(touchX, touchY);
-                    // Save touched pixels
-                    //positions.put(touchX, touchY);
                     savePixelForDraw((int)touchX, (int)touchY);
                     break;
                 }
                 event.setAction(MotionEvent.ACTION_UP);
             case MotionEvent.ACTION_UP:
-                for(Float x : positions.keySet()){
-                    Float y = positions.get(x);
-                    if(!isErasing){
-                        // TODO: add chosen color to big pixels
-                    } else {
-                        // TODO: Delete Color in big pixels
-                    }
-                }
                 drawPath.reset();
                 break;
             default:
@@ -182,8 +173,6 @@ public class DrawingView extends View {
         int j = stepSizeY*fieldY;
         Rect rect = new Rect(i, j, i+stepSizeX-1, j+stepSizeY-1);
 
-        //// TODO: 28.11.2017 remove fette linie
-        drawPaint.setStrokeWidth(stepSizeX-1);
         canvas.drawRect(rect, drawPaint);
 
         /*
@@ -220,13 +209,4 @@ public class DrawingView extends View {
         invalidate();
         drawPaint.setColor(Color.parseColor(color));
     }
-
-/*    public Class Position {
-        private Float posX;
-        private Float posY;
-
-        public Position(Float posX, Float posY){
-            this.posX = posX;
-        }
-    }*/
 }
