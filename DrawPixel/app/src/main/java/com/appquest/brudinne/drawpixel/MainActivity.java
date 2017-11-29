@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
@@ -146,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
                 JSONArray savedArray = new JSONArray();
 
+                ArrayList<ArrayList<Paint>> pixels = drawingView.getPixels();
                 int xLength = pixels.size();
                 for(int x = 0; x<xLength; x++){
                     int yLength = pixels.get(x).size();
@@ -153,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                         JSONObject pixel = new JSONObject();
                         pixel.put("y", ""+y);
                         pixel.put("x", ""+x);
-                        pixel.put("color", pixels.get(x).get(y));
+                        pixel.put("color", String.format("#%08X", pixels.get(x).get(y).getColor()));
 
                         savedArray.put(pixel);
                     }

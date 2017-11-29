@@ -31,9 +31,25 @@ public class DrawingView extends View {
     private Paint linePaint                 = new Paint();
     private Paint initPaint                 = new Paint();
     private boolean isErasing               = false;
-    private ArrayList<DrawingPixel> pixelList = new ArrayList<>();
+    private ArrayList<DrawingPixel> pixelList = new ArrayList();
 
     private ArrayList<ArrayList<Paint>> pixels;
+
+    public ArrayList<DrawingPixel> getPixelList() {
+        return pixelList;
+    }
+
+    public void setPixelList(ArrayList<DrawingPixel> pixelList) {
+        this.pixelList = pixelList;
+    }
+
+    public ArrayList<ArrayList<Paint>> getPixels() {
+        return pixels;
+    }
+
+    public void setPixels(ArrayList<ArrayList<Paint>> pixels) {
+        this.pixels = pixels;
+    }
 
     Context context;
     Canvas canvas;
@@ -41,11 +57,23 @@ public class DrawingView extends View {
     int stepSizeY;
     int maxX;
     int maxY;
+    int pixelCanvas;
+    int pixelCell;
 
+    Color white = new Color();
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
+        maxX = getWidth();
+        maxY = getHeight();
+
+        pixelCanvas = maxX;
+        pixelCell = (pixelCanvas - (GRID_SIZE+1))/GRID_SIZE;
+
+        stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
+        stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
+
 
         drawPaint.setAntiAlias(true);
 
@@ -57,6 +85,14 @@ public class DrawingView extends View {
         linePaint.setStrokeWidth(1.0f);
         linePaint.setStyle(Paint.Style.STROKE);
 
+        /*
+        pixelList = new ArrayList();
+        for(int i = 0; i<GRID_SIZE; i++){
+            for(int j = 0; j<GRID_SIZE; j++){
+                pixelList.add(new DrawingPixel(new Rect(i*stepSizeX, j*stepSizeY, (i + 1)*stepSizeX, (j + 1)*stepSizeY),Color.WHITE));
+            }
+        }
+        *////*
         pixels = new ArrayList();
         for(int i = 0; i<GRID_SIZE; i++){
             ArrayList<Paint> pixelY = new ArrayList();
@@ -65,6 +101,7 @@ public class DrawingView extends View {
             }
             pixels.add(pixelY);
         }
+        //*/
     }
 
     @Override
@@ -74,15 +111,16 @@ public class DrawingView extends View {
         maxX = getWidth();
         maxY = getHeight();
 
-        int pixelCanvas = maxX;
-        int pixelCell = (pixelCanvas - (GRID_SIZE+1))/GRID_SIZE;
+        pixelCanvas = maxX;
+        pixelCell = (pixelCanvas - (GRID_SIZE+1))/GRID_SIZE;
+
+        stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
+        stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
 
         Bitmap bitmap = Bitmap.createBitmap(pixelCanvas,pixelCanvas,Bitmap.Config.ARGB_8888);
         this.canvas = new Canvas(bitmap);
         this.canvas.drawBitmap(bitmap, new Matrix(), initPaint);
 
-        stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
-        stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
 
         // draw border
         for (int i = 0; i < GRID_SIZE; i++) {
