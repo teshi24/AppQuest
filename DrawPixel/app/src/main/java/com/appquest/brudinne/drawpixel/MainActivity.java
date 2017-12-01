@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
@@ -148,6 +148,29 @@ public class MainActivity extends AppCompatActivity {
 
                 JSONArray savedArray = new JSONArray();
 
+                ArrayList<DrawingPixel> pixels = drawingView.getPixelList();
+                int pixelAmount = pixels.size();
+                int stepSizeX = (int)Math.floor(Math.sqrt(pixelAmount));
+
+                for(int i = 0; i<pixelAmount; i++){
+                    DrawingPixel bigPixel = pixels.get(i);
+                    int color = bigPixel.getColor();
+                    if(color == Color.WHITE){
+                        continue;
+                    }
+                    Rect drawRect = bigPixel.getRect();
+                    int x = (int)Math.floor(drawRect.left / stepSizeX);
+                    int y = (int)Math.floor(drawRect.top / stepSizeX);
+
+                    JSONObject pixel = new JSONObject();
+                    pixel.put("y", ""+y);
+                    pixel.put("x", ""+x);
+                    pixel.put("color", String.format("#%08X", color));
+
+                    savedArray.put(pixel);
+                }
+
+                /*
                 ArrayList<ArrayList<Paint>> pixels = drawingView.getPixels();
                 int xLength = pixels.size();
                 for(int x = 0; x<xLength; x++){
@@ -165,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
                         savedArray.put(pixel);
                     }
                 }
+                */
 
                 if (savedArray != null && savedArray.length() > 0) {
                     log.put("task", "Pixelmaler");
@@ -179,15 +203,6 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("ch.appquest.logmessage", log.toString());
             startActivity(intent);
         }
-    }
-
-    private ArrayList<ArrayList<String>> pixels = new ArrayList<>();
-
-    private void setPixels(){
-        ArrayList<String> pixelY = new ArrayList<>();
-        pixelY.add("#FF000000");
-        pixelY.add(((ImageButton)findViewById(R.id.paintBlack)).getTag().toString().toUpperCase());
-        pixels.add(pixelY);
     }
 
     /**

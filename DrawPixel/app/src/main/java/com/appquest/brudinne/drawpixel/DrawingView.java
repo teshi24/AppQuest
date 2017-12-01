@@ -14,7 +14,6 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -33,7 +32,7 @@ public class DrawingView extends View {
     private boolean isErasing               = false;
     private ArrayList<DrawingPixel> pixelList = new ArrayList();
 
-    private ArrayList<ArrayList<Paint>> pixels;
+    //private ArrayList<ArrayList<Paint>> pixels;
 
     public ArrayList<DrawingPixel> getPixelList() {
         return pixelList;
@@ -44,11 +43,12 @@ public class DrawingView extends View {
     }
 
     public ArrayList<ArrayList<Paint>> getPixels() {
-        return pixels;
+      //  return pixels;
+        return null;
     }
 
     public void setPixels(ArrayList<ArrayList<Paint>> pixels) {
-        this.pixels = pixels;
+        //this.pixels = pixels;
     }
 
     Context context;
@@ -65,15 +65,16 @@ public class DrawingView extends View {
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
+
+        /*
         maxX = getWidth();
         maxY = getHeight();
-
         pixelCanvas = maxX;
         pixelCell = (pixelCanvas - (GRID_SIZE+1))/GRID_SIZE;
 
         stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
         stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
-
+        */
 
         drawPaint.setAntiAlias(true);
 
@@ -89,10 +90,11 @@ public class DrawingView extends View {
         pixelList = new ArrayList();
         for(int i = 0; i<GRID_SIZE; i++){
             for(int j = 0; j<GRID_SIZE; j++){
-                pixelList.add(new DrawingPixel(new Rect(i*stepSizeX, j*stepSizeY, (i + 1)*stepSizeX, (j + 1)*stepSizeY),Color.WHITE));
+                pixelList.add(new DrawingPixel(new Rect((i*stepSizeX), (j*stepSizeY), ((i + 1)*stepSizeX), ((j + 1)*stepSizeY)),Color.WHITE));
             }
         }
-        *////*
+        */
+         /*
         pixels = new ArrayList();
         for(int i = 0; i<GRID_SIZE; i++){
             ArrayList<Paint> pixelY = new ArrayList();
@@ -101,7 +103,7 @@ public class DrawingView extends View {
             }
             pixels.add(pixelY);
         }
-        //*/
+        */
     }
 
     @Override
@@ -117,20 +119,30 @@ public class DrawingView extends View {
         stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
         stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
 
+        if(pixelList == null || pixelList.isEmpty()){
+            drawBackground(-1);
+        }
+
         Bitmap bitmap = Bitmap.createBitmap(pixelCanvas,pixelCanvas,Bitmap.Config.ARGB_8888);
         this.canvas = new Canvas(bitmap);
         this.canvas.drawBitmap(bitmap, new Matrix(), initPaint);
 
 
         // draw border
+/*
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
-                //if (cellChecked[i][j]) {
-                    canvas.drawRect(i * stepSizeX, j * stepSizeY, (i + 1) * stepSizeX, (j + 1) * stepSizeY, linePaint);
-                //}
+                canvas.drawRect(i * stepSizeX, j * stepSizeY, (i + 1) * stepSizeX, (j + 1) * stepSizeY, linePaint);
             }
         }
+//*/
+///*
+        drawBigPixel(canvas);
 
+        for(int i = 0; i < GRID_SIZE*GRID_SIZE; i++){
+            canvas.drawRect(pixelList.get(i).getRect(),linePaint);
+        }
+//*/
         // TODO: check if we can get maxX and max to something dividing through 13
         canvas.drawLine(0, maxY, maxX, maxY, linePaint);
         canvas.drawLine(maxX, 0, maxX, maxY, linePaint);
@@ -138,10 +150,28 @@ public class DrawingView extends View {
         // Zeichnet einen Pfad der dem Finger folgt
         // canvas.drawPath(drawPath, drawPaint);
 
-        drawBigPixel(canvas);
+    }
+
+    private void drawBackground(int color){
+        if(color == -1) {
+            color = Color.WHITE;
+        }
+        pixelList = new ArrayList();
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                pixelList.add(new DrawingPixel(new Rect(i*stepSizeX, j*stepSizeY, (i + 1)*stepSizeX-1, (j + 1)*stepSizeY-1), color));
+            }
+        }
     }
 
     private void drawBigPixel(Canvas canvas){
+        for(int i = 0; i<GRID_SIZE*GRID_SIZE; i++){
+            DrawingPixel bigPixel = pixelList.get(i);
+            Paint p = new Paint();
+            p.setColor(bigPixel.getColor());
+            canvas.drawRect(bigPixel.getRect(),p);
+        }
+        /*
         for(int i = 0; i<GRID_SIZE; i++){
             for(int j = 0; j<GRID_SIZE; j++){
                 try{
@@ -160,6 +190,7 @@ public class DrawingView extends View {
                 }
             }
         }
+        */
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -198,9 +229,11 @@ public class DrawingView extends View {
     private void savePixelForDraw(int x, int y){
         int fieldX = (int)Math.floor(x / stepSizeX);
         int fieldY = (int)Math.floor(y / stepSizeY);
+        pixelList.get((fieldY+(fieldX*13))).setColor(drawPaint.getColor());
+
         //save touched pixel
-        Paint p = new Paint(drawPaint);
-        pixels.get(fieldX).set(fieldY, p);
+        //Paint p = new Paint(drawPaint);
+        //pixels.get(fieldX).set(fieldY, p);
     }
 
     private void drawPixel(int x, int y, Canvas canvas){
@@ -226,7 +259,7 @@ public class DrawingView extends View {
     }
 
     public void startNew() {
-        // TODO Gitter löschen
+        pixelList = null;
         invalidate();
     }
 

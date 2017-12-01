@@ -1,31 +1,30 @@
 package com.appquest.brudinne.drawpixel;
 
-import android.graphics.Color;
 import android.graphics.Rect;
 
 public class DrawingPixel {
-    private Rect rectOnCanvas = null;
-    private Color color;
+    private Rect rect = null;
+    private int color;
 
-    public DrawingPixel(Rect rectOnCanvas, Color color) {
-        this.rectOnCanvas = rectOnCanvas;
+    public DrawingPixel(Rect rect, int color) {
+        this.rect = rect;
         this.color = color;
     }
 
-    public void setColor(Color color) {
+    public void setColor(int color) {
         this.color = color;
     }
 
-    public Color getColor() {
+    public int getColor() {
         return this.color;
     }
 
-    public Rect getRectOnDrawingPitchCanvas() {
-        return this.rectOnCanvas;
+    public Rect getRect() {
+        return this.rect;
     }
 
-    public void setRectOnDrawingPitchCanvas(Rect rectOnCanvas) {
-        this.rectOnCanvas = rectOnCanvas;
+    public void setRect(Rect rect) {
+        this.rect = rect;
     }
 
     @Override
