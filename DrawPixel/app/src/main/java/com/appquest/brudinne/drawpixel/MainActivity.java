@@ -160,7 +160,8 @@ public class MainActivity extends AppCompatActivity {
 
                 ArrayList<DrawingPixel> pixels = drawingView.getPixelList();
                 int pixelAmount = pixels.size();
-                int stepSizeX = (int)Math.floor(Math.sqrt(pixelAmount));
+                int stepSizeX = drawingView.getStepSizeX();
+                int stepSizeY = drawingView.getStepSizeY();
 
                 for(int i = 0; i<pixelAmount; i++){
                     DrawingPixel bigPixel = pixels.get(i);
@@ -169,8 +170,9 @@ public class MainActivity extends AppCompatActivity {
                         continue;
                     }
                     Rect drawRect = bigPixel.getRect();
+                    //todo: maybe easier way to do this
                     int x = (int)Math.floor(drawRect.left / stepSizeX);
-                    int y = (int)Math.floor(drawRect.top / stepSizeX);
+                    int y = (int)Math.floor(drawRect.top / stepSizeY);
 
                     JSONObject pixel = new JSONObject();
                     pixel.put("y", ""+y);

@@ -38,16 +38,16 @@ public class DrawingView extends View {
         this.pixelList = pixelList;
     }
 
-    Context context;
-    Canvas canvas;
-    int stepSizeX;
-    int stepSizeY;
-    int maxX;
-    int maxY;
-    int pixelCanvas;
-    int pixelCell;
+    private Context context;
+    private Canvas canvas;
+    private int stepSizeX;
+    private int stepSizeY;
+    private int maxX;
+    private int maxY;
+    private int pixelCanvas;
+    private int pixelCell;
 
-    Color white = new Color();
+    private Color white = new Color();
 
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -188,10 +188,14 @@ public class DrawingView extends View {
         isErasing = isErase;
         if (isErasing) {
             drawPaint.setColor(Color.WHITE);
-            //drawPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        } //else {
-            //drawPaint.setXfermode(null);
-        //}
+        }
+        /*
+        if (isErasing) {
+            drawPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        } else {
+            drawPaint.setXfermode(null);
+        }
+        */
     }
 
     public boolean getIsErasing() {
@@ -201,5 +205,13 @@ public class DrawingView extends View {
     public void setColor(String color) {
         invalidate();
         drawPaint.setColor(Color.parseColor(color));
+    }
+
+    public int getStepSizeX() {
+        return stepSizeX;
+    }
+
+    public int getStepSizeY() {
+        return stepSizeY;
     }
 }
