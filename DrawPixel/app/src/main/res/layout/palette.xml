@@ -1,7 +1,8 @@
 <LinearLayout
     android:id="@+id/LinearLayout2"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="50dp"
+    android:layout_marginTop="10dp"
     android:weightSum="7"
     android:showDividers="middle"
     android:divider="@drawable/divider"
