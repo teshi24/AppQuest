@@ -1,3 +1,12 @@
+/**
+ * V1
+ * --
+ * app is running, basic functions are working
+ * bugs:
+ * - eraser not working
+ * - DrawingPixel as class abgrenzen
+ */
+
 package com.appquest.brudinne.drawpixel;
 
 import android.app.AlertDialog;
@@ -40,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         }
         drawingView.setErase(true);
     }
+
     public void createShortCut(){
         Intent shortcutintent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
         shortcutintent.putExtra("duplicate", false);
