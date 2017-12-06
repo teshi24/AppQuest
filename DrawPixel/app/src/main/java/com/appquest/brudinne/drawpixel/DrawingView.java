@@ -148,7 +148,7 @@ public class DrawingView extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                drawPath.moveTo(touchX, touchY);
+                //drawPath.moveTo(touchX, touchY);
                 if(isErasing){
                     //drawPaint.setColor(Color.parseColor(""+R.color.white));
                 }
@@ -157,13 +157,13 @@ public class DrawingView extends View {
             case MotionEvent.ACTION_MOVE:
                 //todo: besseres handling
                 if(touchX < maxX && touchY < maxY && touchX >= 0 && touchY >= 0){
-                    drawPath.lineTo(touchX, touchY);
+                    //drawPath.lineTo(touchX, touchY);
                     savePixelForDraw((int)touchX, (int)touchY);
                     break;
                 }
                 event.setAction(MotionEvent.ACTION_UP);
             case MotionEvent.ACTION_UP:
-                drawPath.reset();
+                //drawPath.reset();
                 break;
             default:
                 return false;
