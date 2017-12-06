@@ -23,11 +23,11 @@ public class DrawingView extends View {
 
     private static final int GRID_SIZE = 13;
 
-    private Path drawPath                   = new Path();
-    private Paint drawPaint                 = new Paint();
-    private Paint linePaint                 = new Paint();
-    private Paint initPaint                 = new Paint();
-    private boolean isErasing               = false;
+    private Path drawPath                     = new Path();
+    private Paint drawPaint                   = new Paint();
+    private Paint linePaint                   = new Paint();
+    private Paint initPaint                   = new Paint();
+    private boolean isErasing                 = false;
     private ArrayList<DrawingPixel> pixelList = new ArrayList();
 
     public ArrayList<DrawingPixel> getPixelList() {
