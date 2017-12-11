@@ -5,13 +5,13 @@
     android:layout_height="70dp">
 
     <ImageButton
-        android:id="@+id/pencil"
+        android:id="@+id/brush"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
         android:layout_weight="1"
         android:layout_margin="5dp"
-        android:src="@drawable/eraser"
+        android:src="@drawable/brush"
         android:onClick="switchUtil" />
 
     <ImageButton
@@ -21,7 +21,7 @@
         android:layout_gravity="center"
         android:layout_weight="1"
         android:layout_margin="5dp"
-        android:src="@drawable/eraser"
+        android:src="@drawable/can"
         android:onClick="switchUtil" />
 
     <ImageButton
@@ -41,7 +41,7 @@
         android:layout_gravity="center"
         android:layout_weight="1"
         android:layout_margin="5dp"
-        android:src="@drawable/eraser"
+        android:src="@drawable/undo"
         android:onClick="undo" />
 
 </LinearLayout>
