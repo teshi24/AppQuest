@@ -6,11 +6,18 @@ public class DrawingPixel {
     private Rect rect = null;
     private int color;
 
+    /**
+     * @param rect from real pixels
+     * @param color pixel color
+     */
     public DrawingPixel(Rect rect, int color) {
         this.rect = rect;
         this.color = color;
     }
 
+    /**
+     * @return copy of the pixel
+     */
     @Override
     protected DrawingPixel clone() {
         return new DrawingPixel(rect, color);
@@ -33,7 +40,7 @@ public class DrawingPixel {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "";
     }
 }

@@ -8,25 +8,38 @@ import android.widget.LinearLayout;
 public class SquareLayout extends LinearLayout {
     private int mScale = 1;
 
+    /**
+     * @param context related activity
+     */
     public SquareLayout(Context context) {
         super(context);
     }
 
+    /**
+     * @param context related activity
+     * @param attrs
+     */
     public SquareLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
+    /**
+     * @param widthMeasureSpec
+     * @param heightMeasureSpec
+     */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         getWidth();
         getHeight();
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
+        int width   = MeasureSpec.getSize(widthMeasureSpec);
+        int height  = MeasureSpec.getSize(heightMeasureSpec);
 
-        if (width > (int)(mScale  * height + 0.5)) {
-            width = (int)(mScale * height + 0.5);
+        int scale = (int) (mScale * height + 0.5);
+
+        if (width > scale) {
+            width = scale;
         } else {
-            height = (int)(width / mScale + 0.5);
+            height = (int) (width / mScale + 0.5);
         }
 
         super.onMeasure(

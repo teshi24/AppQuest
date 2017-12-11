@@ -21,19 +21,11 @@ import java.util.ArrayList;
  */
 public class DrawingView extends View {
 
-    private static final int GRID_SIZE = 13;
-
-    private Path drawPath                     = new Path();
-    private Paint drawPaint                   = new Paint();
-    private Paint linePaint                   = new Paint();
-    private Paint initPaint                   = new Paint();
-    private boolean isErasing                 = false;
-    private ArrayList<DrawingPixel> pixelList = new ArrayList();
-    private ArrayList<ArrayList<DrawingPixel>> steps = new ArrayList();
-
-    private int util = 0;
-
+    // related activity
     private Context context;
+
+    // grid
+    private static final int GRID_SIZE  = 13;
     private Canvas canvas;
     private int pixelSizeX;
     private int pixelSizeY;
@@ -42,48 +34,23 @@ public class DrawingView extends View {
     private int pixelCanvas;
     private int pixelCell;
 
-    private Color white = new Color();
+    // picture
+    private ArrayList<DrawingPixel> pixelList           = new ArrayList();
+    private ArrayList<ArrayList<DrawingPixel>> steps    = new ArrayList();
 
-    public boolean undo(){
-        int lastIndex = steps.size()-1;
-        if(lastIndex >= 0) {
-            steps.remove(lastIndex);
-            if(lastIndex != 0){
-                lastIndex--;
+    // paints
+    private Path drawPath   = new Path();
+    private Paint drawPaint = new Paint();
+    private Paint linePaint = new Paint();
+    private Paint initPaint = new Paint();
 
-                pixelList = steps.get(lastIndex);
-                //steps.remove(lastIndex);
-                invalidate();
-                return true;
-            }
-        }
-        if(steps.isEmpty()){
-            saveStep();
-        }
-        return false;
-    }
+    // tools
+    private boolean isErasing   = false;
+    private int util            = 0;
 
-    public void saveStep(){
-        // max undo's
-        if(steps.size() == 10){
-            steps.remove(0);
-        }
-        if(steps == null){
-            steps.add(null);
-        }
 
-        if(pixelList != null){
-            //steps.add((ArrayList<DrawingPixel>)pixelList.clone());
-            ArrayList<DrawingPixel> temp = new ArrayList();
-            for(DrawingPixel pixel: pixelList){
-                temp.add(pixel.clone());
-            }
-            steps.add(temp);
-        }else{
-            steps.add(null);
-        }
-    }
-
+    // create, draw and touch
+    // ----------------------
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
@@ -97,6 +64,7 @@ public class DrawingView extends View {
         linePaint.setColor(0xFF666666);
         linePaint.setStrokeWidth(1.0f);
         linePaint.setStyle(Paint.Style.STROKE);
+
         saveStep();
     }
 
@@ -134,27 +102,6 @@ public class DrawingView extends View {
 
         // Zeichnet einen Pfad der dem Finger folgt
         // canvas.drawPath(drawPath, drawPaint);
-    }
-
-    private void drawBackground(int color){
-        if(color == -1) {
-            color = Color.WHITE;
-        }
-        pixelList = new ArrayList();
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
-                pixelList.add(new DrawingPixel(new Rect(i* pixelSizeX, j* pixelSizeY, (i + 1)* pixelSizeX -1, (j + 1)* pixelSizeY -1), color));
-            }
-        }
-    }
-
-    private void drawBigPixel(Canvas canvas){
-        Paint p = new Paint();
-        for(int i = 0; i<GRID_SIZE*GRID_SIZE; i++){
-            DrawingPixel bigPixel = pixelList.get(i);
-            p.setColor(bigPixel.getColor());
-            canvas.drawRect(bigPixel.getRect(),p);
-        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -196,6 +143,58 @@ public class DrawingView extends View {
         return true;
     }
 
+    // for all
+    // -------
+    public void startNew() {
+        pixelList = null;
+        steps = new ArrayList();
+        saveStep();
+        invalidate();
+    }
+
+    private void drawBackground(int color){
+        if(color == -1) {
+            color = Color.WHITE;
+        }
+        pixelList = new ArrayList();
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                pixelList.add(new DrawingPixel(new Rect(i* pixelSizeX, j* pixelSizeY, (i + 1)* pixelSizeX -1, (j + 1)* pixelSizeY -1), color));
+            }
+        }
+    }
+
+    private void drawBigPixel(Canvas canvas){
+        Paint p = new Paint();
+        for(int i = 0; i<GRID_SIZE*GRID_SIZE; i++){
+            DrawingPixel bigPixel = pixelList.get(i);
+            p.setColor(bigPixel.getColor());
+            canvas.drawRect(bigPixel.getRect(),p);
+        }
+    }
+
+
+    // brush
+    // -----
+    private void savePixelForDraw(int x, int y){
+        int fieldX = (int)Math.floor(x / pixelSizeX);
+        int fieldY = (int)Math.floor(y / pixelSizeY);
+        pixelList.get((fieldY+(fieldX*13))).setColor(drawPaint.getColor());
+    }
+
+    // can
+    // ---
+
+
+
+    // change
+    // ------
+    private int getPixelColor(int x, int y){
+        int fieldX = (int)Math.floor(x / pixelSizeX);
+        int fieldY = (int)Math.floor(y / pixelSizeY);
+        return pixelList.get((fieldY+(fieldX*13))).getColor();
+    }
+
     private void changeColor(int oldColor, int newColor){
         if(oldColor != newColor) {
             for (DrawingPixel pixel : pixelList) {
@@ -206,24 +205,45 @@ public class DrawingView extends View {
         }
     }
 
-    private int getPixelColor(int x, int y){
-        int fieldX = (int)Math.floor(x / pixelSizeX);
-        int fieldY = (int)Math.floor(y / pixelSizeY);
-        return pixelList.get((fieldY+(fieldX*13))).getColor();
+    // undo
+    // ----
+    public void saveStep(){
+        // max undo's
+        if(steps.size() == 10){
+            steps.remove(0);
+        }
+        if(pixelList != null){
+            ArrayList<DrawingPixel> temp = new ArrayList();
+            for(DrawingPixel pixel: pixelList){
+                temp.add(pixel.clone());
+            }
+            steps.add(temp);
+        }else{
+            steps.add(null);
+        }
     }
 
-    private void savePixelForDraw(int x, int y){
-        int fieldX = (int)Math.floor(x / pixelSizeX);
-        int fieldY = (int)Math.floor(y / pixelSizeY);
-        pixelList.get((fieldY+(fieldX*13))).setColor(drawPaint.getColor());
+    public boolean undo(){
+        int lastIndex = steps.size()-1;
+        if(lastIndex >= 0) {
+            steps.remove(lastIndex);
+            if(lastIndex != 0){
+                lastIndex--;
+
+                pixelList = steps.get(lastIndex);
+                //steps.remove(lastIndex);
+                invalidate();
+                return true;
+            }
+        }
+        if(steps.isEmpty()){
+            saveStep();
+        }
+        return false;
     }
 
-    public void startNew() {
-        pixelList = null;
-        steps = new ArrayList();
-        saveStep();
-        invalidate();
-    }
+    // getter and setter
+    // -----------------
 
     public void setErase(boolean isErase) {
         isErasing = isErase;
@@ -235,8 +255,6 @@ public class DrawingView extends View {
     public boolean getIsErasing() {
         return isErasing;
     }
-
-
 
     public void setColor(String color) {
         invalidate();

@@ -1,54 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="70dp">
+    android:layout_height="70dp"
+    android:orientation="horizontal">
 
     <ImageButton
         android:id="@+id/brush"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:layout_margin="5dp"
-        android:src="@drawable/brush"
+        android:layout_weight="1"
         android:background="@color/background"
         android:contentDescription="@string/brush"
-        android:onClick="switchUtil" />
+        android:onClick="switchUtil"
+        android:src="@drawable/brush" />
 
     <ImageButton
         android:id="@+id/fill_can"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:layout_margin="5dp"
-        android:src="@drawable/can"
+        android:layout_weight="1"
         android:background="@color/background"
         android:contentDescription="@string/can"
-        android:onClick="switchUtil" />
+        android:onClick="switchUtil"
+        android:src="@drawable/can" />
 
     <ImageButton
         android:id="@+id/change"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:layout_margin="5dp"
-        android:src="@drawable/change"
+        android:layout_weight="1"
         android:background="@color/background"
         android:contentDescription="@string/change"
-        android:onClick="switchUtil" />
+        android:onClick="switchUtil"
+        android:src="@drawable/change" />
 
     <ImageButton
         android:id="@+id/undo_step"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:layout_margin="5dp"
-        android:src="@drawable/undo"
+        android:layout_weight="1"
         android:background="@color/background"
-        android:onClick="undo" />
+        android:onClick="undo"
+        android:src="@drawable/undo" />
 
 </LinearLayout>

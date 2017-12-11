@@ -9,9 +9,10 @@
         android:layout_height="45dp"
         android:layout_marginTop="10dp"
         android:layout_weight="6"
-        android:weightSum="6"
+        android:divider="@drawable/divider"
         android:showDividers="middle"
-        android:divider="@drawable/divider">
+        android:weightSum="6">
+
         <ImageButton
             android:id="@+id/paintBlue"
             android:layout_width="match_parent"
@@ -26,9 +27,9 @@
             android:id="@+id/paintGreen"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
             android:layout_weight="1"
             android:background="@color/green"
-            android:layout_marginLeft="5dp"
             android:contentDescription="@string/paint"
             android:onClick="paintClicked"
             android:tag="@color/green" />
@@ -37,9 +38,9 @@
             android:id="@+id/paintYellow"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
             android:layout_weight="1"
             android:background="@color/yellow"
-            android:layout_marginLeft="5dp"
             android:contentDescription="@string/paint"
             android:onClick="paintClicked"
             android:tag="@color/yellow" />
@@ -48,9 +49,9 @@
             android:id="@+id/paintRed"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
             android:layout_weight="1"
             android:background="@color/red"
-            android:layout_marginLeft="5dp"
             android:contentDescription="@string/paint"
             android:onClick="paintClicked"
             android:tag="@color/red" />
@@ -59,9 +60,9 @@
             android:id="@+id/paintBlack"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
             android:layout_weight="1"
             android:background="@color/black"
-            android:layout_marginLeft="5dp"
             android:contentDescription="@string/paint"
             android:onClick="paintClicked"
             android:tag="@color/black" />
@@ -70,29 +71,31 @@
             android:id="@+id/paintGrey"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
             android:layout_weight="1"
             android:background="@color/grey"
-            android:layout_marginLeft="5dp"
             android:contentDescription="@string/paint"
             android:onClick="paintClicked"
             android:tag="@color/grey" />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/eraser"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginTop="8dp"
-        android:layout_alignParentRight="true">
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="8dp">
+
         <ImageButton
             android:id="@+id/erase"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_gravity="center"
-            android:layout_weight="1"
             android:layout_margin="5dp"
-            android:src="@drawable/eraser"
+            android:layout_weight="1"
             android:background="@color/background"
             android:contentDescription="@string/erase"
-            android:onClick="eraseClicked" />
+            android:onClick="eraseClicked"
+            android:src="@drawable/eraser" />
     </LinearLayout>
 </RelativeLayout>
