@@ -84,7 +84,7 @@
         android:layout_marginTop="8dp"
         android:layout_alignParentRight="true">
         <ImageButton
-            android:id="@+id/erase_btn"
+            android:id="@+id/change"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_gravity="center"

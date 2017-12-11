@@ -54,7 +54,13 @@ public class MainActivity extends AppCompatActivity {
     public void switchUtil(View view){
         if(view != currentUtil) {
             currentUtil = (ImageButton) view;
-            drawingView.changeUtil();
+            String util = (String) currentUtil.getContentDescription();
+            if(util.equals(getString(R.string.brush)))
+                drawingView.setUtil(0);
+            else if(util.equals(getString(R.string.can)))
+                drawingView.setUtil(1);
+            else if(util.equals(getString(R.string.change)))
+                drawingView.setUtil(2);
         }
     }
 

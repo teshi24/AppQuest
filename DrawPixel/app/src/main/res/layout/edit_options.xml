@@ -12,6 +12,7 @@
         android:layout_weight="1"
         android:layout_margin="5dp"
         android:src="@drawable/brush"
+        android:contentDescription="@string/brush"
         android:onClick="switchUtil" />
 
     <ImageButton
@@ -22,17 +23,19 @@
         android:layout_weight="1"
         android:layout_margin="5dp"
         android:src="@drawable/can"
+        android:contentDescription="@string/can"
         android:onClick="switchUtil" />
 
     <ImageButton
-        android:id="@+id/erase_btn"
+        android:id="@+id/change"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
         android:layout_weight="1"
         android:layout_margin="5dp"
-        android:src="@drawable/eraser"
-        android:onClick="erase" />
+        android:src="@drawable/change"
+        android:contentDescription="@string/change"
+        android:onClick="switchUtil" />
 
     <ImageButton
         android:id="@+id/undo_step"

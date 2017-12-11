@@ -34,7 +34,7 @@ public class DrawingView extends View {
         return pixelList;
     }
 
-    private boolean utilBrush = true;
+    private int util = 0;
 
     public void setPixelList(ArrayList<DrawingPixel> pixelList) {
         this.pixelList = pixelList;
@@ -151,16 +151,19 @@ public class DrawingView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 //drawPath.moveTo(touchX, touchY);
-                if(isErasing){
+               // if(isErasing){
                     //drawPaint.setColor(Color.parseColor(""+R.color.white));
-                }
-                if(utilBrush)
+                //}
+                if(util == 0){
                     savePixelForDraw((int)touchX, (int)touchY);
-                else
+                } else if(util == 1){
                     drawBackground(drawPaint.getColor());
+                } else {
+                    changeColor(getPixelColor((int) touchX, (int) touchY), drawPaint.getColor());
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if(utilBrush) {
+                if(util == 0) {
                     //todo: besseres handling
                     if (touchX < maxX && touchY < maxY && touchX >= 0 && touchY >= 0) {
                         //drawPath.lineTo(touchX, touchY);
@@ -178,6 +181,22 @@ public class DrawingView extends View {
 
         invalidate();
         return true;
+    }
+
+    private void changeColor(int oldColor, int newColor){
+        if(oldColor != newColor) {
+            for (DrawingPixel pixel : pixelList) {
+                if (pixel.getColor() == oldColor) {
+                    pixel.setColor(newColor);
+                }
+            }
+        }
+    }
+
+    private int getPixelColor(int x, int y){
+        int fieldX = (int)Math.floor(x / stepSizeX);
+        int fieldY = (int)Math.floor(y / stepSizeY);
+        return pixelList.get((fieldY+(fieldX*13))).getColor();
     }
 
     private void savePixelForDraw(int x, int y){
@@ -209,12 +228,7 @@ public class DrawingView extends View {
         return isErasing;
     }
 
-    public void changeUtil(){
-        if(utilBrush)
-            utilBrush = false;
-        else
-            utilBrush = true;
-    }
+
 
     public void setColor(String color) {
         invalidate();
@@ -227,5 +241,13 @@ public class DrawingView extends View {
 
     public int getStepSizeY() {
         return stepSizeY;
+    }
+
+    public int getUtil() {
+        return util;
+    }
+
+    public void setUtil(int util) {
+        this.util = util;
     }
 }
