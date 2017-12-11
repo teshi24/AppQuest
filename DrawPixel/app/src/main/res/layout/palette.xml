@@ -1,87 +1,98 @@
-<LinearLayout
-    android:id="@+id/LinearLayout2"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
-    android:layout_marginTop="10dp"
-    android:weightSum="7"
-    android:showDividers="middle"
-    android:divider="@drawable/divider"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="match_parent">
 
-    <ImageButton
-        android:id="@+id/paintBlue"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@color/blue"
-        android:contentDescription="@string/paint"
-        android:onClick="paintClicked"
-        android:tag="@color/blue" />
+    <LinearLayout
+        android:id="@+id/LinearLayout2"
+        android:layout_width="270dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="6"
+        android:weightSum="6"
+        android:showDividers="middle"
+        android:divider="@drawable/divider">
+        <ImageButton
+            android:id="@+id/paintBlue"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/blue"
+            android:contentDescription="@string/paint"
+            android:onClick="paintClicked"
+            android:tag="@color/blue" />
 
-    <ImageButton
-        android:id="@+id/paintGreen"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@color/green"
-        android:layout_marginLeft="5dp"
-        android:contentDescription="@string/paint"
-        android:onClick="paintClicked"
-        android:tag="@color/green" />
+        <ImageButton
+            android:id="@+id/paintGreen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/green"
+            android:layout_marginLeft="5dp"
+            android:contentDescription="@string/paint"
+            android:onClick="paintClicked"
+            android:tag="@color/green" />
 
-    <ImageButton
-        android:id="@+id/paintYellow"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@color/yellow"
-        android:layout_marginLeft="5dp"
-        android:contentDescription="@string/paint"
-        android:onClick="paintClicked"
-        android:tag="@color/yellow" />
+        <ImageButton
+            android:id="@+id/paintYellow"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/yellow"
+            android:layout_marginLeft="5dp"
+            android:contentDescription="@string/paint"
+            android:onClick="paintClicked"
+            android:tag="@color/yellow" />
 
-    <ImageButton
-        android:id="@+id/paintRed"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@color/red"
-        android:layout_marginLeft="5dp"
-        android:contentDescription="@string/paint"
-        android:onClick="paintClicked"
-        android:tag="@color/red" />
+        <ImageButton
+            android:id="@+id/paintRed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/red"
+            android:layout_marginLeft="5dp"
+            android:contentDescription="@string/paint"
+            android:onClick="paintClicked"
+            android:tag="@color/red" />
 
-    <ImageButton
-        android:id="@+id/paintBlack"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@color/black"
-        android:layout_marginLeft="5dp"
-        android:contentDescription="@string/paint"
-        android:onClick="paintClicked"
-        android:tag="@color/black" />
+        <ImageButton
+            android:id="@+id/paintBlack"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/black"
+            android:layout_marginLeft="5dp"
+            android:contentDescription="@string/paint"
+            android:onClick="paintClicked"
+            android:tag="@color/black" />
 
-    <ImageButton
-        android:id="@+id/paintGrey"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@color/grey"
-        android:layout_marginLeft="5dp"
-        android:contentDescription="@string/paint"
-        android:onClick="paintClicked"
-        android:tag="@color/grey" />
-
-    <ImageButton
-        android:id="@+id/erase_btn"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_gravity="center"
-        android:layout_weight="1"
-        android:layout_marginLeft="5dp"
-        android:background="@drawable/eraser"
-        android:contentDescription="@string/erase"
-        android:onClick="eraseClicked" />
-
-</LinearLayout>
+        <ImageButton
+            android:id="@+id/paintGrey"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/grey"
+            android:layout_marginLeft="5dp"
+            android:contentDescription="@string/paint"
+            android:onClick="paintClicked"
+            android:tag="@color/grey" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/LinearLayout3"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:layout_alignParentRight="true">
+        <ImageButton
+            android:id="@+id/erase_btn"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:layout_margin="5dp"
+            android:src="@drawable/eraser"
+            android:background="@color/background"
+            android:contentDescription="@string/erase"
+            android:onClick="eraseClicked" />
+    </LinearLayout>
+</RelativeLayout>
