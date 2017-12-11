@@ -32,7 +32,7 @@
         android:layout_weight="1"
         android:layout_margin="5dp"
         android:src="@drawable/eraser"
-        android:onClick="switchUtil" />
+        android:onClick="erase" />
 
     <ImageButton
         android:id="@+id/undo_step"

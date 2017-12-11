@@ -34,6 +34,8 @@ public class DrawingView extends View {
         return pixelList;
     }
 
+    private boolean utilBrush = true;
+
     public void setPixelList(ArrayList<DrawingPixel> pixelList) {
         this.pixelList = pixelList;
     }
@@ -152,16 +154,21 @@ public class DrawingView extends View {
                 if(isErasing){
                     //drawPaint.setColor(Color.parseColor(""+R.color.white));
                 }
-                savePixelForDraw((int)touchX, (int)touchY);
+                if(utilBrush)
+                    savePixelForDraw((int)touchX, (int)touchY);
+                else
+                    drawBackground(drawPaint.getColor());
                 break;
             case MotionEvent.ACTION_MOVE:
-                //todo: besseres handling
-                if(touchX < maxX && touchY < maxY && touchX >= 0 && touchY >= 0){
-                    //drawPath.lineTo(touchX, touchY);
-                    savePixelForDraw((int)touchX, (int)touchY);
-                    break;
+                if(utilBrush) {
+                    //todo: besseres handling
+                    if (touchX < maxX && touchY < maxY && touchX >= 0 && touchY >= 0) {
+                        //drawPath.lineTo(touchX, touchY);
+                        savePixelForDraw((int) touchX, (int) touchY);
+                        break;
+                    }
+                    event.setAction(MotionEvent.ACTION_UP);
                 }
-                event.setAction(MotionEvent.ACTION_UP);
             case MotionEvent.ACTION_UP:
                 //drawPath.reset();
                 break;
@@ -200,6 +207,13 @@ public class DrawingView extends View {
 
     public boolean getIsErasing() {
         return isErasing;
+    }
+
+    public void changeUtil(){
+        if(utilBrush)
+            utilBrush = false;
+        else
+            utilBrush = true;
     }
 
     public void setColor(String color) {

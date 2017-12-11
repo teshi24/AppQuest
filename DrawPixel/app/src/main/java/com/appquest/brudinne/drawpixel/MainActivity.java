@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawingView drawingView;
     private ImageButton currentBrush;
+    private ImageButton currentUtil;
 
     private SharedPreferences appPreferences;
     private boolean isShortcutInstalled = false;
@@ -48,6 +49,13 @@ public class MainActivity extends AppCompatActivity {
             currentBrush = (ImageButton) view;
         }
         drawingView.setErase(true);
+    }
+
+    public void switchUtil(View view){
+        if(view != currentUtil) {
+            currentUtil = (ImageButton) view;
+            drawingView.changeUtil();
+        }
     }
 
     public void createShortCut(){
