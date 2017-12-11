@@ -51,6 +51,12 @@ public class MainActivity extends AppCompatActivity {
         drawingView.setErase(true);
     }
 
+    public void undo(View view){
+        if(!drawingView.undo()) {
+            Toast.makeText(this, "No undos possible.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void switchUtil(View view){
         if(view != currentUtil) {
             currentUtil = (ImageButton) view;
@@ -174,8 +180,8 @@ public class MainActivity extends AppCompatActivity {
 
                 ArrayList<DrawingPixel> pixels = drawingView.getPixelList();
                 int pixelAmount = pixels.size();
-                int stepSizeX = drawingView.getStepSizeX();
-                int stepSizeY = drawingView.getStepSizeY();
+                int stepSizeX = drawingView.getPixelSizeX();
+                int stepSizeY = drawingView.getPixelSizeY();
 
                 for(int i = 0; i<pixelAmount; i++){
                     DrawingPixel bigPixel = pixels.get(i);
@@ -196,31 +202,11 @@ public class MainActivity extends AppCompatActivity {
                     savedArray.put(pixel);
                 }
 
-                /*
-                ArrayList<ArrayList<Paint>> pixels = drawingView.getPixels();
-                int xLength = pixels.size();
-                for(int x = 0; x<xLength; x++){
-                    int yLength = pixels.get(x).size();
-                    for(int y = 0; y<yLength; y++){
-                        int color = pixels.get(x).get(y).getColor();
-                        if(color == Color.WHITE) {
-                            continue;
-                        }
-                        JSONObject pixel = new JSONObject();
-                        pixel.put("y", ""+y);
-                        pixel.put("x", ""+x);
-                        pixel.put("color", String.format("#%08X", color));
-
-                        savedArray.put(pixel);
-                    }
-                }
-                */
-
                 if (savedArray != null && savedArray.length() > 0) {
                     log.put("task", "Pixelmaler");
                     log.put("pixels", savedArray);
                 } else {
-                    Toast.makeText(this, "No matches to log.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "No pixel to log.", Toast.LENGTH_LONG).show();
                     return;
                 }
             } catch (JSONException e) {

@@ -11,6 +11,11 @@ public class DrawingPixel {
         this.color = color;
     }
 
+    @Override
+    protected DrawingPixel clone() {
+        return new DrawingPixel(rect, color);
+    }
+
     public void setColor(int color) {
         this.color = color;
     }

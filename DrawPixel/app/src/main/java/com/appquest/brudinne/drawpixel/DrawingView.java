@@ -29,21 +29,14 @@ public class DrawingView extends View {
     private Paint initPaint                   = new Paint();
     private boolean isErasing                 = false;
     private ArrayList<DrawingPixel> pixelList = new ArrayList();
-
-    public ArrayList<DrawingPixel> getPixelList() {
-        return pixelList;
-    }
+    private ArrayList<ArrayList<DrawingPixel>> steps = new ArrayList();
 
     private int util = 0;
 
-    public void setPixelList(ArrayList<DrawingPixel> pixelList) {
-        this.pixelList = pixelList;
-    }
-
     private Context context;
     private Canvas canvas;
-    private int stepSizeX;
-    private int stepSizeY;
+    private int pixelSizeX;
+    private int pixelSizeY;
     private int maxX;
     private int maxY;
     private int pixelCanvas;
@@ -51,19 +44,49 @@ public class DrawingView extends View {
 
     private Color white = new Color();
 
+    public boolean undo(){
+        int lastIndex = steps.size()-1;
+        if(lastIndex >= 0) {
+            steps.remove(lastIndex);
+            if(lastIndex != 0){
+                lastIndex--;
+
+                pixelList = steps.get(lastIndex);
+                //steps.remove(lastIndex);
+                invalidate();
+                return true;
+            }
+        }
+        if(steps.isEmpty()){
+            saveStep();
+        }
+        return false;
+    }
+
+    public void saveStep(){
+        // max undo's
+        if(steps.size() == 10){
+            steps.remove(0);
+        }
+        if(steps == null){
+            steps.add(null);
+        }
+
+        if(pixelList != null){
+            //steps.add((ArrayList<DrawingPixel>)pixelList.clone());
+            ArrayList<DrawingPixel> temp = new ArrayList();
+            for(DrawingPixel pixel: pixelList){
+                temp.add(pixel.clone());
+            }
+            steps.add(temp);
+        }else{
+            steps.add(null);
+        }
+    }
+
     public DrawingView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
-
-        /*
-        maxX = getWidth();
-        maxY = getHeight();
-        pixelCanvas = maxX;
-        pixelCell = (pixelCanvas - (GRID_SIZE+1))/GRID_SIZE;
-
-        stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
-        stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
-        */
 
         drawPaint.setAntiAlias(true);
 
@@ -74,15 +97,7 @@ public class DrawingView extends View {
         linePaint.setColor(0xFF666666);
         linePaint.setStrokeWidth(1.0f);
         linePaint.setStyle(Paint.Style.STROKE);
-
-        /*
-        pixelList = new ArrayList();
-        for(int i = 0; i<GRID_SIZE; i++){
-            for(int j = 0; j<GRID_SIZE; j++){
-                pixelList.add(new DrawingPixel(new Rect((i*stepSizeX), (j*stepSizeY), ((i + 1)*stepSizeX), ((j + 1)*stepSizeY)),Color.WHITE));
-            }
-        }
-        */
+        saveStep();
     }
 
     @Override
@@ -95,8 +110,8 @@ public class DrawingView extends View {
         pixelCanvas = maxX;
         pixelCell = (pixelCanvas - (GRID_SIZE+1))/GRID_SIZE;
 
-        stepSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
-        stepSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
+        pixelSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
+        pixelSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
 
         if(pixelList == null || pixelList.isEmpty()){
             drawBackground(-1);
@@ -128,7 +143,7 @@ public class DrawingView extends View {
         pixelList = new ArrayList();
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
-                pixelList.add(new DrawingPixel(new Rect(i*stepSizeX, j*stepSizeY, (i + 1)*stepSizeX-1, (j + 1)*stepSizeY-1), color));
+                pixelList.add(new DrawingPixel(new Rect(i* pixelSizeX, j* pixelSizeY, (i + 1)* pixelSizeX -1, (j + 1)* pixelSizeY -1), color));
             }
         }
     }
@@ -151,9 +166,6 @@ public class DrawingView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 //drawPath.moveTo(touchX, touchY);
-               // if(isErasing){
-                    //drawPaint.setColor(Color.parseColor(""+R.color.white));
-                //}
                 if(util == 0){
                     savePixelForDraw((int)touchX, (int)touchY);
                 } else if(util == 1){
@@ -174,6 +186,7 @@ public class DrawingView extends View {
                 }
             case MotionEvent.ACTION_UP:
                 //drawPath.reset();
+                saveStep();
                 break;
             default:
                 return false;
@@ -194,19 +207,21 @@ public class DrawingView extends View {
     }
 
     private int getPixelColor(int x, int y){
-        int fieldX = (int)Math.floor(x / stepSizeX);
-        int fieldY = (int)Math.floor(y / stepSizeY);
+        int fieldX = (int)Math.floor(x / pixelSizeX);
+        int fieldY = (int)Math.floor(y / pixelSizeY);
         return pixelList.get((fieldY+(fieldX*13))).getColor();
     }
 
     private void savePixelForDraw(int x, int y){
-        int fieldX = (int)Math.floor(x / stepSizeX);
-        int fieldY = (int)Math.floor(y / stepSizeY);
+        int fieldX = (int)Math.floor(x / pixelSizeX);
+        int fieldY = (int)Math.floor(y / pixelSizeY);
         pixelList.get((fieldY+(fieldX*13))).setColor(drawPaint.getColor());
     }
 
     public void startNew() {
         pixelList = null;
+        steps = new ArrayList();
+        saveStep();
         invalidate();
     }
 
@@ -215,13 +230,6 @@ public class DrawingView extends View {
         if (isErasing) {
             drawPaint.setColor(Color.WHITE);
         }
-        /*
-        if (isErasing) {
-            drawPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        } else {
-            drawPaint.setXfermode(null);
-        }
-        */
     }
 
     public boolean getIsErasing() {
@@ -235,12 +243,12 @@ public class DrawingView extends View {
         drawPaint.setColor(Color.parseColor(color));
     }
 
-    public int getStepSizeX() {
-        return stepSizeX;
+    public int getPixelSizeX() {
+        return pixelSizeX;
     }
 
-    public int getStepSizeY() {
-        return stepSizeY;
+    public int getPixelSizeY() {
+        return pixelSizeY;
     }
 
     public int getUtil() {
@@ -249,5 +257,20 @@ public class DrawingView extends View {
 
     public void setUtil(int util) {
         this.util = util;
+    }
+    public ArrayList<DrawingPixel> getPixelList() {
+        return pixelList;
+    }
+
+    public void setPixelList(ArrayList<DrawingPixel> pixelList) {
+        this.pixelList = pixelList;
+    }
+
+    public ArrayList<ArrayList<DrawingPixel>> getSteps() {
+        return steps;
+    }
+
+    public void setSteps(ArrayList<ArrayList<DrawingPixel>> steps) {
+        this.steps = steps;
     }
 }
