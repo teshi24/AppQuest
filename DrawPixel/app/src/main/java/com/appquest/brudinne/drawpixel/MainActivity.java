@@ -44,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
     public void eraseClicked(View view) {
         if (view != currentBrush) {
             ImageButton imgView = (ImageButton) view;
-            imgView.setImageDrawable(getResources().getDrawable(R.drawable.selected));
+            imgView.setScaleX(Float.parseFloat("0.9"));
+            imgView.setScaleY(Float.parseFloat("0.9"));
             currentBrush.setImageDrawable(null);
             currentBrush = (ImageButton) view;
         }
@@ -59,7 +60,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void switchUtil(View view){
         if(view != currentUtil) {
+            currentUtil.setScaleX(Float.parseFloat("1"));
+            currentUtil.setScaleY(Float.parseFloat("1"));
+            view.setScaleX(Float.parseFloat("0.9"));
+            view.setScaleY(Float.parseFloat("0.9"));
             currentUtil = (ImageButton) view;
+
             String util = (String) currentUtil.getContentDescription();
             if(util.equals(getString(R.string.brush)))
                 drawingView.setUtil(0);
@@ -99,6 +105,10 @@ public class MainActivity extends AppCompatActivity {
         currentBrush.setImageDrawable(getResources().getDrawable(R.drawable.selected));
         String color = currentBrush.getTag().toString();
         drawingView.setColor(color);
+
+        currentUtil = (ImageButton) findViewById(R.id.brush);
+        currentUtil.setScaleX(Float.parseFloat("0.9"));
+        currentUtil.setScaleY(Float.parseFloat("0.9"));
     }
 
     private void onCreateNewDrawingAction() {
@@ -125,7 +135,12 @@ public class MainActivity extends AppCompatActivity {
             String color = view.getTag().toString();
             drawingView.setColor(color);
             imgView.setImageDrawable(getResources().getDrawable(R.drawable.selected));
-            currentBrush.setImageDrawable(null);
+            if(!drawingView.getIsErasing()){
+                currentBrush.setImageDrawable(null);
+            }else{
+                currentBrush.setScaleX(Float.parseFloat("1"));
+                currentBrush.setScaleY(Float.parseFloat("1"));
+            }
             currentBrush = (ImageButton) view;
         }
         drawingView.setErase(false);

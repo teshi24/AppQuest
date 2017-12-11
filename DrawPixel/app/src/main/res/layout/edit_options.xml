@@ -12,6 +12,7 @@
         android:layout_weight="1"
         android:layout_margin="5dp"
         android:src="@drawable/brush"
+        android:background="@color/background"
         android:contentDescription="@string/brush"
         android:onClick="switchUtil" />
 
@@ -23,6 +24,7 @@
         android:layout_weight="1"
         android:layout_margin="5dp"
         android:src="@drawable/can"
+        android:background="@color/background"
         android:contentDescription="@string/can"
         android:onClick="switchUtil" />
 
@@ -34,6 +36,7 @@
         android:layout_weight="1"
         android:layout_margin="5dp"
         android:src="@drawable/change"
+        android:background="@color/background"
         android:contentDescription="@string/change"
         android:onClick="switchUtil" />
 
@@ -45,6 +48,7 @@
         android:layout_weight="1"
         android:layout_margin="5dp"
         android:src="@drawable/undo"
+        android:background="@color/background"
         android:onClick="undo" />
 
 </LinearLayout>
