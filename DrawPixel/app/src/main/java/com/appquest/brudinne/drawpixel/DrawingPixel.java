@@ -2,6 +2,9 @@ package com.appquest.brudinne.drawpixel;
 
 import android.graphics.Rect;
 
+/**
+ * a square of smaller pixels which can get colored
+ */
 public class DrawingPixel {
     private Rect rect = null;
     private int color;
@@ -37,10 +40,5 @@ public class DrawingPixel {
 
     public void setRect(Rect rect) {
         this.rect = rect;
-    }
-
-    @Override
-    public String toString() {
-        return "";
     }
 }

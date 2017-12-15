@@ -1,6 +1,27 @@
 /**
+ * Date:            16.12.2017
+ * Version:         2.0
+ * Author:          Natalie Stalder, Nadja Stadelmann
+ * AppQuest 2017:
+ * Team:            Brudinne
+ * App 4:           PixelMaler
+ * Version Test:    Handy:           APK 23
+ *                  Emulator:        APK 26
+ * <p>
+ * Version Changes
+ * ---------------
  * V2
  * --
+ * special functions available now
+ * changes:
+ * - eraser picture changed into nicer function pictures
+ * - special functions added
+ *   - can      --> fill everything with a color
+ *   - switch   --> change a color to another
+ *   - undo
+ * bugs:
+ * - fast move forward causes unfilled lines
+ *   --> problem of the touch sensor
  * <p>
  * V1
  * --
@@ -51,10 +72,14 @@ public class MainActivity extends AppCompatActivity {
     // app lifecycle handling
     // ----------------------
 
+    /**
+     * creates the activity
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        appPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        appPreferences      = PreferenceManager.getDefaultSharedPreferences(this);
         isShortcutInstalled = appPreferences.getBoolean("isShortcutInstalled", false);
         if (isShortcutInstalled == false) {
             createShortCut();
@@ -64,49 +89,60 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
-        drawingView = (DrawingView) findViewById(R.id.drawing);
+        drawingView     = (DrawingView) findViewById(R.id.drawing);
 
-        currentBrush = (ImageButton) findViewById(R.id.paintBlue);
+        currentBrush    = (ImageButton) findViewById(R.id.paintBlue);
         currentBrush.setImageDrawable(getResources().getDrawable(R.drawable.selected));
-        String color = currentBrush.getTag().toString();
+        String color    = currentBrush.getTag().toString();
         drawingView.setColor(color);
 
-        currentUtil = (ImageButton) findViewById(R.id.brush);
+        currentUtil     = (ImageButton) findViewById(R.id.brush);
         currentUtil.setScaleX(Float.parseFloat("0.9"));
         currentUtil.setScaleY(Float.parseFloat("0.9"));
     }
 
+    /**
+     * makes an app shortcut on home screen
+     */
     public void createShortCut() {
-        Intent shortcutintent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
-        shortcutintent.putExtra("duplicate", false);
-        shortcutintent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.app_name));
-        Parcelable icon = Intent.ShortcutIconResource.fromContext(getApplicationContext(), R.mipmap.ic_launcher);
-        shortcutintent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
-        shortcutintent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(getApplicationContext(), MainActivity.class));
-        sendBroadcast(shortcutintent);
+        Intent shortCutIntent   = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+        Parcelable icon         = Intent.ShortcutIconResource.fromContext(getApplicationContext(), R.mipmap.ic_launcher);
+        shortCutIntent.putExtra("duplicate", false);
+        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.app_name));
+        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
+        shortCutIntent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(getApplicationContext(), MainActivity.class));
+        sendBroadcast(shortCutIntent);
     }
 
 
     // color handling
     // --------------
 
+    /**
+     * get eraser feature
+     * @param view eraser button
+     */
     public void eraseClicked(View view) {
         if (view != currentBrush) {
             ImageButton imgView = (ImageButton) view;
             imgView.setScaleX(Float.parseFloat("0.9"));
             imgView.setScaleY(Float.parseFloat("0.9"));
+
             currentBrush.setImageDrawable(null);
             currentBrush = (ImageButton) view;
         }
         drawingView.setErase(true);
     }
 
+    /**
+     * get paint feature
+     * @param view paint buttons
+     */
     public void paintClicked(View view) {
         if (view != currentBrush) {
             ImageButton imgView = (ImageButton) view;
-            String color = view.getTag().toString();
-            drawingView.setColor(color);
             imgView.setImageDrawable(getResources().getDrawable(R.drawable.selected));
+            drawingView.setColor(view.getTag().toString());
             if (!drawingView.getIsErasing()) {
                 currentBrush.setImageDrawable(null);
             } else {
@@ -120,10 +156,16 @@ public class MainActivity extends AppCompatActivity {
 
     // special functions
     // -----------------
+
+    /**
+     * get new features from view
+     * @param view util buttons
+     */
     public void switchUtil(View view) {
         if (view != currentUtil) {
             currentUtil.setScaleX(Float.parseFloat("1"));
             currentUtil.setScaleY(Float.parseFloat("1"));
+
             view.setScaleX(Float.parseFloat("0.9"));
             view.setScaleY(Float.parseFloat("0.9"));
             currentUtil = (ImageButton) view;
@@ -138,6 +180,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * make a step backwards
+     * @param view undo button
+     */
     public void undo(View view) {
         if (!drawingView.undo()) {
             Toast.makeText(this, "No undos possible.", Toast.LENGTH_SHORT).show();
@@ -149,9 +195,8 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * prepare log
-     *
      * @param menu
-     * @return
+     * @return true when log, false by new drawing
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -161,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 log();
-                return false;
+                return true;
             }
         });
 
@@ -171,12 +216,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 onCreateNewDrawingAction();
-                return true;
+                return false;
             }
         });
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * get alert to verify if the user really want to start a new drawing an delete the old one
+     */
     private void onCreateNewDrawingAction() {
         AlertDialog.Builder newDialog = new AlertDialog.Builder(this);
         newDialog.setTitle("New Drawing");
@@ -206,10 +254,6 @@ public class MainActivity extends AppCompatActivity {
         JSONObject log = new JSONObject();
         if (checkInstalled(intent, "Logbook")) {
             try {
-                //makeJSONArray();
-                // todo: replace with 'real' array
-                //setPixels();
-
                 JSONArray savedArray = new JSONArray();
 
                 ArrayList<DrawingPixel> pixels = drawingView.getPixelList();

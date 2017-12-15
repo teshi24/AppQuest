@@ -25,8 +25,8 @@ public class DrawingView extends View {
     private int maxY;
 
     // picture
-    private ArrayList<DrawingPixel> pixelList = new ArrayList();
-    private ArrayList<ArrayList<DrawingPixel>> steps = new ArrayList();
+    private ArrayList<DrawingPixel> pixelList           = new ArrayList();
+    private ArrayList<ArrayList<DrawingPixel>> steps    = new ArrayList();
 
     // paints
     private Paint drawPaint = new Paint();
@@ -34,8 +34,8 @@ public class DrawingView extends View {
     private Paint initPaint = new Paint();
 
     // tools
-    private boolean isErasing = false;
-    private int util = 0;
+    private boolean isErasing   = false;
+    private int util            = 0;
 
     // create, draw and touch
     // ----------------------
@@ -65,10 +65,10 @@ public class DrawingView extends View {
      */
     @Override
     protected void onDraw(Canvas canvas) {
-        maxX = getWidth();
-        maxY = getHeight();
-        pixelSizeX = (int) Math.ceil((double) maxX / GRID_SIZE);
-        pixelSizeY = (int) Math.ceil((double) maxY / GRID_SIZE);
+        maxX        = getWidth();
+        maxY        = getHeight();
+        pixelSizeX  = (int) Math.ceil((double) maxX / GRID_SIZE);
+        pixelSizeY  = (int) Math.ceil((double) maxY / GRID_SIZE);
 
         if (pixelList == null || pixelList.isEmpty()) {
             drawBackground(-1);
@@ -76,9 +76,14 @@ public class DrawingView extends View {
         drawBigPixel(canvas);
 
         // draw border
+        for(DrawingPixel pixel: pixelList) {
+            canvas.drawRect(pixel.getRect(), linePaint);
+        }
+        /*
         for (int i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
             canvas.drawRect(pixelList.get(i).getRect(), linePaint);
         }
+        */
         canvas.drawLine(0, maxY, maxX, maxY, linePaint);
         canvas.drawLine(maxX, 0, maxX, maxY, linePaint);
     }
@@ -121,15 +126,23 @@ public class DrawingView extends View {
         return true;
     }
 
-    // for all
+    // for all utils
     // -------
+
+    /**
+     * get a empty picture
+     */
     public void startNew() {
-        pixelList = null;
-        steps = new ArrayList();
+        pixelList   = null;
+        steps       = new ArrayList();
         saveStep();
         invalidate();
     }
 
+    /**
+     * draw whole grid background in a color
+     * @param color background color, if -1 = background gets white
+     */
     private void drawBackground(int color) {
         if (color == -1) {
             color = Color.WHITE;
@@ -142,31 +155,59 @@ public class DrawingView extends View {
         }
     }
 
+    /**
+     * draw all DrawingPixels
+     * @param canvas
+     */
     private void drawBigPixel(Canvas canvas) {
         Paint p = new Paint();
+        for(DrawingPixel pixel: pixelList) {
+            p.setColor(pixel.getColor());
+            canvas.drawRect(pixel.getRect(), p);
+        }
+        /*
         for (int i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
             DrawingPixel bigPixel = pixelList.get(i);
             p.setColor(bigPixel.getColor());
             canvas.drawRect(bigPixel.getRect(), p);
         }
+        */
     }
 
     // brush
     // -----
+
+    /**
+     * change color of DrawingPixel in which a touchEvent occurred
+     * @param x touchEvent x
+     * @param y touchEvent y
+     */
     private void savePixelForDraw(int x, int y) {
-        int fieldX = (int) Math.floor(x / pixelSizeX);
-        int fieldY = (int) Math.floor(y / pixelSizeY);
+        int fieldX  = (int) Math.floor(x / pixelSizeX);
+        int fieldY  = (int) Math.floor(y / pixelSizeY);
         pixelList.get((fieldY + (fieldX * 13))).setColor(drawPaint.getColor());
     }
 
     // change
     // ------
+
+    /**
+     * get color of DrawingPixel in which a touchEvent occurred
+     * @param x touchEvent x
+     * @param y touchEvent y
+     * @return color of touched DrawingPixel
+     */
     private int getPixelColor(int x, int y) {
-        int fieldX = (int) Math.floor(x / pixelSizeX);
-        int fieldY = (int) Math.floor(y / pixelSizeY);
+        int fieldX  = (int) Math.floor(x / pixelSizeX);
+        int fieldY  = (int) Math.floor(y / pixelSizeY);
         return pixelList.get((fieldY + (fieldX * 13))).getColor();
     }
 
+    /**
+     * change color of all DrawingPixels with oldColor to newColor
+     * @param oldColor
+     * @param newColor
+     */
     private void changeColor(int oldColor, int newColor) {
         if (oldColor != newColor) {
             for (DrawingPixel pixel : pixelList) {
@@ -179,6 +220,10 @@ public class DrawingView extends View {
 
     // undo
     // ----
+
+    /**
+     * save a step into the undo list
+     */
     public void saveStep() {
         // max undo's
         if (steps.size() == 10) {
@@ -195,15 +240,18 @@ public class DrawingView extends View {
         }
     }
 
+    /**
+     * undo the last step
+     * max 10 steps possible
+     * @return true if undo was possible, false if not possible
+     */
     public boolean undo() {
         int lastIndex = steps.size() - 1;
         if (lastIndex >= 0) {
             steps.remove(lastIndex);
             if (lastIndex != 0) {
                 lastIndex--;
-
                 pixelList = steps.get(lastIndex);
-                //steps.remove(lastIndex);
                 invalidate();
                 return true;
             }

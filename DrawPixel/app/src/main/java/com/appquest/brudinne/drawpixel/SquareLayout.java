@@ -5,6 +5,10 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 
 // http://stackoverflow.com/questions/2948212/android-layout-with-sqare-buttons
+
+/**
+ * to achieve the grid layout
+ */
 public class SquareLayout extends LinearLayout {
     private int mScale = 1;
 
